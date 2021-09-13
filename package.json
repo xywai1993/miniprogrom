@@ -1,0 +1,17 @@
+{
+    "name": "miniprogram",
+    "type": "module",
+    "dependencies": {
+        "@vue/compiler-sfc": "^3.2.11",
+        "@vue/reactivity": "^3.2.11",
+        "recast": "^0.20.5",
+        "rollup": "^2.56.3"
+    },
+    "scripts": {
+        "dev": "node main.js",
+        "rollup": "rollup --config"
+    },
+    "devDependencies": {
+        "rollup-plugin-node-resolve": "^5.2.0"
+    }
+}
