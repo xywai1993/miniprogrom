@@ -21,11 +21,13 @@ function makeMap(str, expectsLowerCase) {
     ? Object.freeze({})
     : {};
 (process.env.NODE_ENV !== 'production') ? Object.freeze([]) : [];
+const NOOP = () => { };
 const extend = Object.assign;
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 const hasOwn = (val, key) => hasOwnProperty.call(val, key);
 const isArray = Array.isArray;
 const isMap = (val) => toTypeString(val) === '[object Map]';
+const isFunction = (val) => typeof val === 'function';
 const isString = (val) => typeof val === 'string';
 const isSymbol = (val) => typeof val === 'symbol';
 const isObject = (val) => val !== null && typeof val === 'object';
@@ -53,6 +55,14 @@ const capitalize = cacheStringFunction((str) => str.charAt(0).toUpperCase() + st
 // compare whether a value has changed, accounting for NaN.
 const hasChanged = (value, oldValue) => !Object.is(value, oldValue);
 
+let activeEffectScope;
+function recordEffectScope(effect, scope) {
+    scope = scope || activeEffectScope;
+    if (scope && scope.active) {
+        scope.effects.push(effect);
+    }
+}
+
 const createDep = (effects) => {
     const dep = new Set(effects);
     dep.w = 0;
@@ -61,17 +71,129 @@ const createDep = (effects) => {
 };
 const wasTracked = (dep) => (dep.w & trackOpBit) > 0;
 const newTracked = (dep) => (dep.n & trackOpBit) > 0;
+const initDepMarkers = ({ deps }) => {
+    if (deps.length) {
+        for (let i = 0; i < deps.length; i++) {
+            deps[i].w |= trackOpBit; // set was tracked
+        }
+    }
+};
+const finalizeDepMarkers = (effect) => {
+    const { deps } = effect;
+    if (deps.length) {
+        let ptr = 0;
+        for (let i = 0; i < deps.length; i++) {
+            const dep = deps[i];
+            if (wasTracked(dep) && !newTracked(dep)) {
+                dep.delete(effect);
+            }
+            else {
+                deps[ptr++] = dep;
+            }
+            // clear bits
+            dep.w &= ~trackOpBit;
+            dep.n &= ~trackOpBit;
+        }
+        deps.length = ptr;
+    }
+};
 
 const targetMap = new WeakMap();
+// The number of effects currently being tracked recursively.
+let effectTrackDepth = 0;
 let trackOpBit = 1;
+/**
+ * The bitwise track markers support at most 30 levels op recursion.
+ * This value is chosen to enable modern JS engines to use a SMI on all platforms.
+ * When recursion depth is greater, fall back to using a full cleanup.
+ */
+const maxMarkerBits = 30;
+const effectStack = [];
 let activeEffect;
 const ITERATE_KEY = Symbol((process.env.NODE_ENV !== 'production') ? 'iterate' : '');
 const MAP_KEY_ITERATE_KEY = Symbol((process.env.NODE_ENV !== 'production') ? 'Map key iterate' : '');
+class ReactiveEffect {
+    constructor(fn, scheduler = null, scope) {
+        this.fn = fn;
+        this.scheduler = scheduler;
+        this.active = true;
+        this.deps = [];
+        recordEffectScope(this, scope);
+    }
+    run() {
+        if (!this.active) {
+            return this.fn();
+        }
+        if (!effectStack.includes(this)) {
+            try {
+                effectStack.push((activeEffect = this));
+                enableTracking();
+                trackOpBit = 1 << ++effectTrackDepth;
+                if (effectTrackDepth <= maxMarkerBits) {
+                    initDepMarkers(this);
+                }
+                else {
+                    cleanupEffect(this);
+                }
+                return this.fn();
+            }
+            finally {
+                if (effectTrackDepth <= maxMarkerBits) {
+                    finalizeDepMarkers(this);
+                }
+                trackOpBit = 1 << --effectTrackDepth;
+                resetTracking();
+                effectStack.pop();
+                const n = effectStack.length;
+                activeEffect = n > 0 ? effectStack[n - 1] : undefined;
+            }
+        }
+    }
+    stop() {
+        if (this.active) {
+            cleanupEffect(this);
+            if (this.onStop) {
+                this.onStop();
+            }
+            this.active = false;
+        }
+    }
+}
+function cleanupEffect(effect) {
+    const { deps } = effect;
+    if (deps.length) {
+        for (let i = 0; i < deps.length; i++) {
+            deps[i].delete(effect);
+        }
+        deps.length = 0;
+    }
+}
+function effect(fn, options) {
+    if (fn.effect) {
+        fn = fn.effect.fn;
+    }
+    const _effect = new ReactiveEffect(fn);
+    if (options) {
+        extend(_effect, options);
+        if (options.scope)
+            recordEffectScope(_effect, options.scope);
+    }
+    if (!options || !options.lazy) {
+        _effect.run();
+    }
+    const runner = _effect.run.bind(_effect);
+    runner.effect = _effect;
+    return runner;
+}
 let shouldTrack = true;
 const trackStack = [];
 function pauseTracking() {
     trackStack.push(shouldTrack);
     shouldTrack = false;
+}
+function enableTracking() {
+    trackStack.push(shouldTrack);
+    shouldTrack = true;
 }
 function resetTracking() {
     const last = trackStack.pop();
@@ -99,11 +221,15 @@ function isTracking() {
 }
 function trackEffects(dep, debuggerEventExtraInfo) {
     let shouldTrack = false;
-    {
+    if (effectTrackDepth <= maxMarkerBits) {
         if (!newTracked(dep)) {
             dep.n |= trackOpBit; // set newly tracked
             shouldTrack = !wasTracked(dep);
         }
+    }
+    else {
+        // Full cleanup mode.
+        shouldTrack = !dep.has(activeEffect);
     }
     if (shouldTrack) {
         dep.add(activeEffect);
@@ -788,6 +914,60 @@ function createRef(rawValue, shallow) {
     }
     return new RefImpl(rawValue, shallow);
 }
+
+class ComputedRefImpl {
+    constructor(getter, _setter, isReadonly) {
+        this._setter = _setter;
+        this.dep = undefined;
+        this._dirty = true;
+        this.__v_isRef = true;
+        this.effect = new ReactiveEffect(getter, () => {
+            if (!this._dirty) {
+                this._dirty = true;
+                triggerRefValue(this);
+            }
+        });
+        this["__v_isReadonly" /* IS_READONLY */] = isReadonly;
+    }
+    get value() {
+        // the computed ref may get wrapped by other proxies e.g. readonly() #3376
+        const self = toRaw(this);
+        trackRefValue(self);
+        if (self._dirty) {
+            self._dirty = false;
+            self._value = self.effect.run();
+        }
+        return self._value;
+    }
+    set value(newValue) {
+        this._setter(newValue);
+    }
+}
+function computed(getterOrOptions, debugOptions) {
+    let getter;
+    let setter;
+    if (isFunction(getterOrOptions)) {
+        getter = getterOrOptions;
+        setter = (process.env.NODE_ENV !== 'production')
+            ? () => {
+                console.warn('Write operation failed: computed value is readonly');
+            }
+            : NOOP;
+    }
+    else {
+        getter = getterOrOptions.get;
+        setter = getterOrOptions.set;
+    }
+    const cRef = new ComputedRefImpl(getter, setter, isFunction(getterOrOptions) || !getterOrOptions.set);
+    if ((process.env.NODE_ENV !== 'production') && debugOptions) {
+        cRef.effect.onTrack = debugOptions.onTrack;
+        cRef.effect.onTrigger = debugOptions.onTrigger;
+    }
+    return cRef;
+}
 Promise.resolve();
 
+exports.computed = computed;
+exports.effect = effect;
+exports.reactive = reactive;
 exports.ref = ref;

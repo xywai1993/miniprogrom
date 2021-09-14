@@ -5,10 +5,13 @@
         "@vue/compiler-sfc": "^3.2.11",
         "@vue/reactivity": "^3.2.11",
         "recast": "^0.20.5",
-        "rollup": "^2.56.3"
+        "rollup": "^2.56.3",
+        "glob": "^7.1.7",
+        "@babel/core": "^7.15.5",
+        "@babel/plugin-transform-modules-commonjs": "^7.15.4"
     },
     "scripts": {
-        "dev": "node main.js",
+        "dev": "node build/main.js",
         "rollup": "rollup --config"
     },
     "devDependencies": {

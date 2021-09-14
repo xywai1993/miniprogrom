@@ -1,1 +1,1 @@
-export { ref } from "./bundle.js";
+export { isProxy, ref, effect, reactive, computed } from '@vue/reactivity';
