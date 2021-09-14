@@ -1,6 +1,6 @@
 import { visit, parse as recastParse, print, types } from 'recast';
 import { parse as vueSFCParse, compileScript } from '@vue/compiler-sfc';
-import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'fs';
 import { createRequire } from 'module';
 import { build as rollupBuild } from './rollup.js';
 import { transformSync } from '@babel/core';
@@ -11,11 +11,15 @@ const require = createRequire(import.meta.url);
 const npmCollection = new Map();
 const jsCollection = new Set();
 
-glob('./src/**/*.vue', {}, function (er, files) {
+glob('src/**/*.vue', {}, function (er, files) {
     console.log({ files, where: 'glob 入口文件' });
     files.forEach((item) => {
         parseVueFile(item);
     });
+
+    console.log({ npmCollection, jsCollection });
+    transformNpm(npmCollection);
+    transformJs(jsCollection);
 });
 
 export function parseVueFile(src) {
@@ -32,11 +36,6 @@ export function parseVueFile(src) {
     // console.log(result.descriptor.template);
 
     collectMap(src, scriptContent, templateContent, styleContent);
-
-    console.log({ npmCollection, jsCollection });
-
-    transformNpm(npmCollection);
-    transformJs(jsCollection);
 
     //TODO: babel 转换方案
     // const output = transformSync(script.content, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
@@ -68,23 +67,27 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
 
                 const node_modules_url = require.resolve(node.source.value);
 
-                // collection.push(require.resolve(node.source.value));
-                // const node_modules_path = node_modules_url.split('node_modules');
-                // const filePath = path.join('miniprogram/node_modules', node_modules_path[1]);
-                // const _dirSrc = path.dirname(filePath);
-                // node.source.value = filePath;
-                // data.replace(node);
                 const specifiers = node.specifiers.map((item) => item.imported.name);
                 console.log('npm 模块，TODO', specifiers);
-
-                const collectionData = { src, node, specifiers, vueScriptContent, vueTemplateContent, vueStyleContent, extName };
+                const targetUrl = `src/node_modules/${node.source.value}.js`;
+                const relativeUrl = path.relative(src, targetUrl);
+                const collectionData = {
+                    src, // 文件源目录
+                    fileName, //文件名
+                    node, //ast node
+                    specifiers, // 导入的关键字  from { a } from '@vue' , 则 specifiers 为['a']
+                    // vueScriptContent,
+                    // vueTemplateContent,
+                    // vueStyleContent,
+                    extName,
+                    fileContent: file,
+                    relativeUrl,
+                };
                 // npmCollection.push(node_modules_url);
                 if (!npmCollection.get(node.source.value)) {
                     npmCollection.set(node.source.value, [collectionData]);
                 } else {
                     npmCollection.get(node.source.value).push(collectionData);
-                    // ls.push(src);
-                    // npmCollection.set(node.source.value, [src]);
                 }
                 return false;
             } catch (error) {
@@ -103,11 +106,7 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
     collection.forEach((item) => {
         //  循环搜集依赖
         console.log({ item, where: '依赖循环处理' });
-        // jsCollection.push(item);
-
         collectMap(item);
-
-        // 转换并写入miniprogram;
     });
 }
 
@@ -132,31 +131,31 @@ export function writeVueToMiniProgram(fileName, scriptContent, templateContent, 
 }
 
 function transformNpm(npmList) {
-    // for (let [key, value] of npmList.entries()) {
-    //     console.log(key + ' = ' + value);
-    // }
-
     npmList.forEach((val, key) => {
-        console.log({ key, val });
         let node = null;
         let specifiers = [];
         val.forEach((data) => {
             data.node.type = 'ExportNamedDeclaration';
-            // code += print(data.node).code;
             node = data.node;
-            // specifiers.concat(data.specifiers);
             specifiers = [...specifiers, ...data.specifiers];
+            transformNpmUrl(data);
         });
-        console.log({ specifiers });
+
         const b = types.builders;
         node.specifiers = [...new Set(specifiers)].map((item) => b.importSpecifier(b.identifier(item)));
-        writeFileSync('./rollupTmp.js', print(node).code);
+        const id = `./rollupTmp-${Math.ceil(Math.random * 10000)}.js`;
+        writeFileSync(id, print(node).code);
         rollupBuild(key).then((url) => {
+            rmSync(id);
             console.log({ url, where: 'rollupbuild' });
             // node.source.value = './miniprogram/bundle.js';
             // writeFileSync('./rollupTmp.js', print(node).code);
         });
     });
+}
+
+function transformNpmUrl(data) {
+    console.log(data);
 }
 
 function transformJs(jsList) {
