@@ -17,8 +17,9 @@ const data = reactive({
     arr: new Array(10).fill(1),
     add: computed(() => data.textNum + 1),
 });
-console.log(isProxy(data));
 
+const d = isProxy(data);
+console.log('几次呢/1111/32222');
 Page({
     data: data,
     onLoad() {

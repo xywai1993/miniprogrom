@@ -10,16 +10,17 @@
 <script>
 //index.js
 const app = getApp();
-import { ref, effect, reactive, computed } from '@vue/reactivity';
-import { test } from './home';
-import { a } from './home2';
-test();
-a();
+import { ref, effect, reactive, computed, readonly, isReadonly } from '@vue/reactivity';
+import { test1 } from '../../util/test2';
+test1();
+console.log(12334567);
 const data = reactive({
     textNum: 0,
     arr: new Array(10).fill(1),
     add: computed(() => data.textNum + 1),
 });
+
+const read = readonly({ a: 1 });
 
 Page({
     data: data,

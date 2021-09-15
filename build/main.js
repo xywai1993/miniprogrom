@@ -9,22 +9,34 @@ import path from 'path';
 import { startTask } from '@yiper.fan/taskbuild';
 
 const require = createRequire(import.meta.url);
-const npmCollection = new Map();
-const jsCollection = new Set();
 
 const targetDir = 'miniprogram';
 rmSync(targetDir, { force: true, recursive: true });
 
+let npmCollection = new Map();
+let jsCollection = new Set();
+
 glob('src/**/*.vue', {}, function (er, files) {
     console.log({ files, where: 'glob 入口文件' });
-    files.forEach((item) => {
-        parseVueFile(item);
-    });
 
+    files.forEach((item) => {
+        watchVueFile(item);
+    });
+});
+
+export function watchVueFile(src) {
+    parseVueFile(src);
     transformJs(jsCollection);
     transformNpmUrl(npmCollection);
     rollupNpm(npmCollection);
-});
+}
+
+export function watchJsFile(src) {
+    collectMap(src);
+    transformJs(jsCollection);
+    transformNpmUrl(npmCollection);
+    rollupNpm(npmCollection);
+}
 
 export function parseVueFile(src) {
     const file = readFileSync(src, { encoding: 'utf-8' });
@@ -90,12 +102,20 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
                     ast: recastAst,
                     relativeUrl,
                 };
-                // npmCollection.push(node_modules_url);
+
                 if (!npmCollection.get(node.source.value)) {
                     npmCollection.set(node.source.value, [collectionData]);
                 } else {
                     npmCollection.get(node.source.value).push(collectionData);
                 }
+                // if (!npmCollection.get(node.source.value)) {
+                //     const newSet = new Set();
+                //     newSet.add(collectionData);
+                //     // npmCollection.set(node.source.value, [collectionData]);
+                // } else {
+                //     const newSet = npmCollection.get(node.source.value);
+                //     newSet.add(collectionData);
+                // }
                 return false;
             } catch (error) {
                 let val = node.source.value;
@@ -119,6 +139,7 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
 /**
  * 转换代码为es5并写入miniprogram
  * @param {path} src 文件path
+ * @param {string} [content] 文件内容，
  */
 export function writeJsToMiniProgram(src, content) {
     const dirSrc = path.dirname(src);
@@ -130,9 +151,8 @@ export function writeJsToMiniProgram(src, content) {
 }
 
 export function writeVueToMiniProgram(fileName, dirSrc, scriptContent, templateContent, styleContent) {
-    console.log({ dirSrc: `${dirSrc.replace(/^src/, targetDir)}` });
-
-    const targetDirSrc = `${dirSrc.replace(/^src/, targetDir)}`;
+    console.log({ fileName, dirSrc });
+    const targetDirSrc = dirSrc.replace(/^src/, targetDir);
 
     const output = transformSync(scriptContent, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
 
@@ -158,16 +178,11 @@ function rollupNpm(npmList) {
         writeFileSync(id, print(node).code);
         rollupBuild(id, key).then((url) => {
             rmSync(id);
-            // console.log({ url, where: 'rollupbuild' });
-            // node.source.value = './miniprogram/bundle.js';
-            // writeFileSync('./rollupTmp.js', print(node).code);
         });
     });
 }
 
 function transformNpmUrl(npmList) {
-    // console.log(data);
-
     npmList.forEach((val, key) => {
         val.forEach((data) => {
             const ast = recastParse(data.fileContent);

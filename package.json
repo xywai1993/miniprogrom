@@ -8,12 +8,14 @@
         "@vue/reactivity": "^3.2.11",
         "@yiper.fan/taskbuild": "^0.0.18",
         "glob": "^7.1.7",
+        "node-watch": "^0.7.1",
         "recast": "^0.20.5",
         "rollup": "^2.56.3"
     },
     "scripts": {
         "dev": "node build/main.js",
-        "rollup": "rollup --config"
+        "rollup": "rollup --config",
+        "watch": "node build/watch.js"
     },
     "devDependencies": {
         "@rollup/plugin-commonjs": "^20.0.0",
