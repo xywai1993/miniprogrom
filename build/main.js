@@ -1,17 +1,19 @@
 import { visit, parse as recastParse, print, types } from 'recast';
 import { parse as vueSFCParse, compileScript } from '@vue/compiler-sfc';
-import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync, rmdirSync } from 'fs';
 import { createRequire } from 'module';
 import { build as rollupBuild } from './rollup.js';
 import { transformSync } from '@babel/core';
 import glob from 'glob';
 import path from 'path';
+import { startTask } from '@yiper.fan/taskbuild';
 
 const require = createRequire(import.meta.url);
 const npmCollection = new Map();
 const jsCollection = new Set();
 
 const targetDir = 'miniprogram';
+rmSync(targetDir, { force: true, recursive: true });
 
 glob('src/**/*.vue', {}, function (er, files) {
     console.log({ files, where: 'glob 入口文件' });
@@ -71,7 +73,7 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
 
                 const specifiers = node.specifiers.map((item) => item.imported.name);
 
-                const targetUrl = `src/node_modules/${node.source.value}.js`;
+                const targetUrl = `src/rollup_modules/${node.source.value}.js`;
                 const relativeUrl = path.relative(dirSrc, targetUrl);
                 const collectionData = {
                     src, // 文件源目录
@@ -123,8 +125,8 @@ export function writeJsToMiniProgram(src, content) {
     const file = readFileSync(src, { encoding: 'utf-8' });
     const output = transformSync(content || file, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
 
-    mkdirSync(dirSrc.replace(/^src/, 'miniprogram'), { recursive: true });
-    writeFileSync(src.replace(/^src/, 'miniprogram'), output.code, { encoding: 'utf-8' }, { flag: 'wr+' });
+    mkdirSync(dirSrc.replace(/^src/, targetDir), { recursive: true });
+    writeFileSync(src.replace(/^src/, targetDir), output.code, { encoding: 'utf-8' }, { flag: 'wr+' });
 }
 
 export function writeVueToMiniProgram(fileName, dirSrc, scriptContent, templateContent, styleContent) {
@@ -230,3 +232,16 @@ function transformJs(jsList) {
 // promise.then(() => {
 //     console.log(print(ast).code);
 // });
+
+startTask({
+    taskList: [
+        {
+            taskName: 'htmlMove',
+            params: {
+                deployTo: targetDir,
+                root: 'src',
+                extname: ['json'],
+            },
+        },
+    ],
+});

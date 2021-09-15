@@ -2,7 +2,7 @@
     <view class="container">
         <view>{{ textNum }}</view>
         <view>{{ add }}</view>
-        <button bindtap="changeNum">点我1122x111</button>
+        <button bindtap="changeNum" class="other-info">点我1122x111</button>
 
         <view wx:for="{{ arr }}" wx:key="index">{{ index }}</view>
     </view>
@@ -10,10 +10,8 @@
 <script>
 //index.js
 const app = getApp();
-import { isProxy } from '@vue/reactivity';
+import { reactive, isProxy, computed, effect } from '@vue/reactivity';
 
-test();
-a();
 const data = reactive({
     textNum: 0,
     arr: new Array(10).fill(1),
