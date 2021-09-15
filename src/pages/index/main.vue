@@ -19,6 +19,7 @@ const data = reactive({
     arr: new Array(10).fill(1),
     add: computed(() => data.textNum + 1),
 });
+console.log(isProxy(data));
 
 Page({
     data: data,

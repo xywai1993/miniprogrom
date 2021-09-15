@@ -19,8 +19,6 @@ glob('src/**/*.vue', {}, function (er, files) {
         parseVueFile(item);
     });
 
-    console.log({ npmCollection, jsCollection });
-
     transformJs(jsCollection);
     transformNpmUrl(npmCollection);
     rollupNpm(npmCollection);
@@ -34,7 +32,13 @@ export function parseVueFile(src) {
     const script = compileScript(result.descriptor, { refTransform: false, id: 'demo' });
     const scriptContent = script.content;
 
+    // 收集依赖
     collectMap(src, scriptContent, templateContent, styleContent);
+
+    // 没有依赖则直接转换为小程序页面
+    const dirSrc = path.dirname(src);
+    const fileName = path.basename(src, '.vue');
+    writeVueToMiniProgram(fileName, dirSrc, scriptContent, templateContent, styleContent);
 }
 
 // 收集依赖
@@ -52,7 +56,6 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
     } else {
         fileName = path.basename(src, '.js');
     }
-    console.log({ dirSrc, fileName, extName });
 
     const recastAst = recastParse(file);
     // const b = types.builders;
@@ -67,7 +70,7 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
                 const node_modules_url = require.resolve(node.source.value);
 
                 const specifiers = node.specifiers.map((item) => item.imported.name);
-                console.log('npm 模块，TODO', specifiers);
+
                 const targetUrl = `src/node_modules/${node.source.value}.js`;
                 const relativeUrl = path.relative(dirSrc, targetUrl);
                 const collectionData = {
@@ -107,7 +110,6 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
 
     collection.forEach((item) => {
         //  循环搜集依赖
-        console.log({ item, where: '依赖循环处理' });
         collectMap(item);
     });
 }
@@ -125,11 +127,17 @@ export function writeJsToMiniProgram(src, content) {
     writeFileSync(src.replace(/^src/, 'miniprogram'), output.code, { encoding: 'utf-8' }, { flag: 'wr+' });
 }
 
-export function writeVueToMiniProgram(fileName, scriptContent, templateContent, styleContent) {
-    mkdirSync(`miniprogram/pages/${fileName}/`, { recursive: true });
-    writeFileSync(`miniprogram/pages/${fileName}/${fileName}.js`, scriptContent, { encoding: 'utf-8' });
-    writeFileSync(`miniprogram/pages/${fileName}/${fileName}.wxml`, templateContent, { encoding: 'utf-8' });
-    writeFileSync(`miniprogram/pages/${fileName}/${fileName}.wxss`, styleContent, { encoding: 'utf-8' });
+export function writeVueToMiniProgram(fileName, dirSrc, scriptContent, templateContent, styleContent) {
+    console.log({ dirSrc: `${dirSrc.replace(/^src/, targetDir)}` });
+
+    const targetDirSrc = `${dirSrc.replace(/^src/, targetDir)}`;
+
+    const output = transformSync(scriptContent, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
+
+    mkdirSync(targetDirSrc, { recursive: true });
+    writeFileSync(`${targetDirSrc}/${fileName}.js`, output.code, { encoding: 'utf-8' });
+    writeFileSync(`${targetDirSrc}/${fileName}.wxml`, templateContent, { encoding: 'utf-8' });
+    writeFileSync(`${targetDirSrc}/${fileName}.wxss`, styleContent, { encoding: 'utf-8' });
 }
 
 function rollupNpm(npmList) {
@@ -148,7 +156,7 @@ function rollupNpm(npmList) {
         writeFileSync(id, print(node).code);
         rollupBuild(id, key).then((url) => {
             rmSync(id);
-            console.log({ url, where: 'rollupbuild' });
+            // console.log({ url, where: 'rollupbuild' });
             // node.source.value = './miniprogram/bundle.js';
             // writeFileSync('./rollupTmp.js', print(node).code);
         });
@@ -174,12 +182,11 @@ function transformNpmUrl(npmList) {
             });
 
             if (data.extName == '.js') {
-                console.log(print(ast).code);
                 writeJsToMiniProgram(data.src, print(ast).code);
             }
 
             if (data.extName == '.vue') {
-                writeVueToMiniProgram(data.fileName, print(ast).code, data.vueTemplateContent, data.vueStyleContent);
+                writeVueToMiniProgram(data.fileName, data.dirSrc, print(ast).code, data.vueTemplateContent, data.vueStyleContent);
             }
         });
     });
