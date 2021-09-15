@@ -3,12 +3,12 @@ import { rollup } from 'rollup';
 import resolve from 'rollup-plugin-node-resolve';
 
 // see below for details on the options
-const inputOptions = {
-    input: './rollupTmp.js',
-    plugins: [resolve()],
-};
 
-export async function build(key) {
+export async function build(input, key) {
+    const inputOptions = {
+        input,
+        plugins: [resolve()],
+    };
     // create a bundle
     const outputOptions = {
         // dir: './dist',

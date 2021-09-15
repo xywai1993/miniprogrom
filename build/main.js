@@ -18,7 +18,7 @@ glob('src/**/*.vue', {}, function (er, files) {
     });
 
     console.log({ npmCollection, jsCollection });
-    transformNpm(npmCollection);
+    rollupNpm(npmCollection);
     transformJs(jsCollection);
 });
 
@@ -130,7 +130,7 @@ export function writeVueToMiniProgram(fileName, scriptContent, templateContent, 
     writeFileSync(`miniprogram/pages/${fileName}/${fileName}.wxss`, styleContent, { encoding: 'utf-8' });
 }
 
-function transformNpm(npmList) {
+function rollupNpm(npmList) {
     npmList.forEach((val, key) => {
         let node = null;
         let specifiers = [];
@@ -138,14 +138,13 @@ function transformNpm(npmList) {
             data.node.type = 'ExportNamedDeclaration';
             node = data.node;
             specifiers = [...specifiers, ...data.specifiers];
-            transformNpmUrl(data);
         });
 
         const b = types.builders;
         node.specifiers = [...new Set(specifiers)].map((item) => b.importSpecifier(b.identifier(item)));
-        const id = `./rollupTmp-${Math.ceil(Math.random * 10000)}.js`;
+        const id = `./rollupTmp-${Math.ceil(Math.random() * 10000)}.js`;
         writeFileSync(id, print(node).code);
-        rollupBuild(key).then((url) => {
+        rollupBuild(id, key).then((url) => {
             rmSync(id);
             console.log({ url, where: 'rollupbuild' });
             // node.source.value = './miniprogram/bundle.js';
