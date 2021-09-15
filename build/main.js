@@ -11,6 +11,8 @@ const require = createRequire(import.meta.url);
 const npmCollection = new Map();
 const jsCollection = new Set();
 
+const targetDir = 'miniprogram';
+
 glob('src/**/*.vue', {}, function (er, files) {
     console.log({ files, where: 'glob 入口文件' });
     files.forEach((item) => {
@@ -18,13 +20,13 @@ glob('src/**/*.vue', {}, function (er, files) {
     });
 
     console.log({ npmCollection, jsCollection });
-    rollupNpm(npmCollection);
+
     transformJs(jsCollection);
+    transformNpmUrl(npmCollection);
+    rollupNpm(npmCollection);
 });
 
 export function parseVueFile(src) {
-    const fileName = path.basename(src, '.vue');
-    const dirSrc = path.dirname(src);
     const file = readFileSync(src, { encoding: 'utf-8' });
     const result = vueSFCParse(file);
     const templateContent = result.descriptor.template.content;
@@ -32,20 +34,14 @@ export function parseVueFile(src) {
     const script = compileScript(result.descriptor, { refTransform: false, id: 'demo' });
     const scriptContent = script.content;
 
-    // console.log(pugRender(result.descriptor.template));
-    // console.log(result.descriptor.template);
-
     collectMap(src, scriptContent, templateContent, styleContent);
-
-    //TODO: babel 转换方案
-    // const output = transformSync(script.content, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
 }
 
 // 收集依赖
 function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) {
     const dirSrc = path.dirname(src);
     let file = readFileSync(src, { encoding: 'utf-8' });
-    let fileName = path.basename(src, '.js');
+    let fileName = '';
     const extName = path.extname(src);
 
     const collection = [];
@@ -53,6 +49,8 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
     if (extName === '.vue') {
         file = vueScriptContent;
         fileName = path.basename(src, '.vue');
+    } else {
+        fileName = path.basename(src, '.js');
     }
     console.log({ dirSrc, fileName, extName });
 
@@ -62,6 +60,7 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
     visit(recastAst, {
         visitImportDeclaration(data) {
             const node = data.node;
+
             try {
                 // 假如是npm模块，直接解析地址
 
@@ -70,17 +69,20 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
                 const specifiers = node.specifiers.map((item) => item.imported.name);
                 console.log('npm 模块，TODO', specifiers);
                 const targetUrl = `src/node_modules/${node.source.value}.js`;
-                const relativeUrl = path.relative(src, targetUrl);
+                const relativeUrl = path.relative(dirSrc, targetUrl);
                 const collectionData = {
                     src, // 文件源目录
+                    dirSrc,
                     fileName, //文件名
+                    npmName: node.source.value,
                     node, //ast node
                     specifiers, // 导入的关键字  from { a } from '@vue' , 则 specifiers 为['a']
-                    // vueScriptContent,
-                    // vueTemplateContent,
-                    // vueStyleContent,
+                    vueScriptContent,
+                    vueTemplateContent,
+                    vueStyleContent,
                     extName,
                     fileContent: file,
+                    ast: recastAst,
                     relativeUrl,
                 };
                 // npmCollection.push(node_modules_url);
@@ -114,10 +116,10 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
  * 转换代码为es5并写入miniprogram
  * @param {path} src 文件path
  */
-export function writeJsToMiniProgram(src) {
+export function writeJsToMiniProgram(src, content) {
     const dirSrc = path.dirname(src);
     const file = readFileSync(src, { encoding: 'utf-8' });
-    const output = transformSync(file, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
+    const output = transformSync(content || file, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
 
     mkdirSync(dirSrc.replace(/^src/, 'miniprogram'), { recursive: true });
     writeFileSync(src.replace(/^src/, 'miniprogram'), output.code, { encoding: 'utf-8' }, { flag: 'wr+' });
@@ -153,8 +155,34 @@ function rollupNpm(npmList) {
     });
 }
 
-function transformNpmUrl(data) {
-    console.log(data);
+function transformNpmUrl(npmList) {
+    // console.log(data);
+
+    npmList.forEach((val, key) => {
+        val.forEach((data) => {
+            const ast = recastParse(data.fileContent);
+
+            visit(ast, {
+                visitImportDeclaration(path) {
+                    const node = path.node;
+                    if (data.npmName == node.source.value) {
+                        node.source.value = data.relativeUrl;
+                        path.replace(node);
+                    }
+                    return false;
+                },
+            });
+
+            if (data.extName == '.js') {
+                console.log(print(ast).code);
+                writeJsToMiniProgram(data.src, print(ast).code);
+            }
+
+            if (data.extName == '.vue') {
+                writeVueToMiniProgram(data.fileName, print(ast).code, data.vueTemplateContent, data.vueStyleContent);
+            }
+        });
+    });
 }
 
 function transformJs(jsList) {
