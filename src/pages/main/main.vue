@@ -13,7 +13,6 @@ const app = getApp();
 import { ref, effect, reactive, computed, readonly, isReadonly } from '@vue/reactivity';
 import { test1 } from '../../util/test2';
 test1();
-console.log(12334567);
 const data = reactive({
     textNum: 0,
     arr: new Array(10).fill(1),

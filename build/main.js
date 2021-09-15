@@ -14,28 +14,33 @@ const targetDir = 'miniprogram';
 rmSync(targetDir, { force: true, recursive: true });
 
 let npmCollection = new Map();
+let moduleCollection = new Map();
 let jsCollection = new Set();
 
 glob('src/**/*.vue', {}, function (er, files) {
     console.log({ files, where: 'glob 入口文件' });
 
-    files.forEach((item) => {
-        watchVueFile(item);
-    });
+    // files.forEach((item) => {
+    //     watchVueFile(item);
+    // });
+    watchVueFile(files);
 });
 
-export function watchVueFile(src) {
-    parseVueFile(src);
+export function watchVueFile(files) {
+    files.forEach((item) => {
+        parseVueFile(item);
+    });
+    console.log({ moduleCollection });
     transformJs(jsCollection);
     transformNpmUrl(npmCollection);
-    rollupNpm(npmCollection);
+    rollupNpm(moduleCollection);
 }
 
 export function watchJsFile(src) {
     collectMap(src);
     transformJs(jsCollection);
     transformNpmUrl(npmCollection);
-    rollupNpm(npmCollection);
+    rollupNpm(moduleCollection);
 }
 
 export function parseVueFile(src) {
@@ -108,14 +113,16 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
                 } else {
                     npmCollection.get(node.source.value).push(collectionData);
                 }
-                // if (!npmCollection.get(node.source.value)) {
-                //     const newSet = new Set();
-                //     newSet.add(collectionData);
-                //     // npmCollection.set(node.source.value, [collectionData]);
-                // } else {
-                //     const newSet = npmCollection.get(node.source.value);
-                //     newSet.add(collectionData);
-                // }
+
+                // 收集某个npm 导入了哪些方法
+                if (!moduleCollection.get(node.source.value)) {
+                    const newSet = new Set();
+                    specifiers.forEach((item) => newSet.add(item));
+                    moduleCollection.set(node.source.value, newSet);
+                } else {
+                    const newSet = moduleCollection.get(node.source.value);
+                    specifiers.forEach((item) => newSet.add(item));
+                }
                 return false;
             } catch (error) {
                 let val = node.source.value;
@@ -162,24 +169,47 @@ export function writeVueToMiniProgram(fileName, dirSrc, scriptContent, templateC
     writeFileSync(`${targetDirSrc}/${fileName}.wxss`, styleContent, { encoding: 'utf-8' });
 }
 
-function rollupNpm(npmList) {
-    npmList.forEach((val, key) => {
-        let node = null;
-        let specifiers = [];
-        val.forEach((data) => {
-            data.node.type = 'ExportNamedDeclaration';
-            node = data.node;
-            specifiers = [...specifiers, ...data.specifiers];
-        });
+function rollupNpm(moduleList) {
+    // npmList.forEach((val, key) => {
+    //     let node = null;
+    //     let specifiers = [];
 
+    //     val.forEach((data) => {
+    //         data.node.type = 'ExportNamedDeclaration';
+    //         node = data.node;
+    //         specifiers = [...specifiers, ...data.specifiers];
+    //     });
+
+    //     const b = types.builders;
+    //     node.specifiers = [...new Set(specifiers)].map((item) => b.importSpecifier(b.identifier(item)));
+    //     console.log(node);
+    //     const test = recastParse(`export {a} from 'vue'`);
+    //     test.program.body[0].specifiers = [b.importSpecifier(b.identifier('s'))];
+    //     test.program.body[0].source = b.literal('vue');
+    //     console.log(print(test).code);
+    //     const id = `./rollupTmp-${Math.ceil(Math.random() * 10000)}.js`;
+    //     writeFileSync(id, print(node).code);
+    //     rollupBuild(id, key).then((url) => {
+    //         rmSync(id);
+    //     });
+    // });
+
+    moduleList.forEach((val, key) => {
         const b = types.builders;
-        node.specifiers = [...new Set(specifiers)].map((item) => b.importSpecifier(b.identifier(item)));
+        const specifiers = [...val].map((item) => b.importSpecifier(b.identifier(item)));
+
+        const node = recastParse(`export {a} from 'b'`);
+        node.program.body[0].specifiers = specifiers;
+        node.program.body[0].source = b.literal(key);
+        console.log(print(node).code);
         const id = `./rollupTmp-${Math.ceil(Math.random() * 10000)}.js`;
         writeFileSync(id, print(node).code);
         rollupBuild(id, key).then((url) => {
             rmSync(id);
         });
     });
+
+    // moduleCollection.forEach()
 }
 
 function transformNpmUrl(npmList) {
