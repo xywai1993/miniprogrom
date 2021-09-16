@@ -29,6 +29,8 @@ export function watchVueFile(files: string[]) {
         parseVueFile(item);
     });
 
+    // console.log({ jsCollection, moduleCollection, fileCollection });
+
     transformJs(jsCollection);
     transformNpmUrl(fileCollection);
     rollupNpm(moduleCollection);
@@ -216,7 +218,23 @@ function rollupNpm(moduleList: Map<string, Set<string>>) {
     });
 }
 
-function transformNpmUrl(fileList: Map<string, any>) {
+function transformNpmUrl(
+    fileList: Map<
+        string,
+        {
+            src: string;
+            dirSrc: string;
+            fileName: string;
+            relativeUrl: string;
+            fileContent: string;
+            vueScriptContent: string | undefined;
+            vueTemplateContent: string | undefined;
+            vueStyleContent: string | undefined;
+            extName: string;
+            npm: Set<any>;
+        }
+    >
+) {
     fileList.forEach((data, src) => {
         let file = readFileSync(src, { encoding: 'utf-8' });
 
@@ -245,7 +263,7 @@ function transformNpmUrl(fileList: Map<string, any>) {
         }
 
         if (data.extName == '.vue') {
-            writeVueToMiniProgram(src, print(ast).code, data.vueTemplateContent, data.vueStyleContent);
+            writeVueToMiniProgram(src, print(ast).code, data.vueTemplateContent || '', data.vueStyleContent || '');
         }
     });
 }
