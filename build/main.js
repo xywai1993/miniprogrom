@@ -13,9 +13,9 @@ const require = createRequire(import.meta.url);
 const targetDir = 'miniprogram';
 rmSync(targetDir, { force: true, recursive: true });
 
-let npmCollection = new Map();
 let moduleCollection = new Map();
 let jsCollection = new Set();
+let fileCollection = new Map();
 
 glob('src/**/*.vue', {}, function (er, files) {
     console.log({ files, where: 'glob 入口文件' });
@@ -30,16 +30,16 @@ export function watchVueFile(files) {
     files.forEach((item) => {
         parseVueFile(item);
     });
-    console.log({ moduleCollection });
+    console.log({ fileCollection });
     transformJs(jsCollection);
-    transformNpmUrl(npmCollection);
+    transformNpmUrl(fileCollection);
     rollupNpm(moduleCollection);
 }
 
 export function watchJsFile(src) {
     collectMap(src);
     transformJs(jsCollection);
-    transformNpmUrl(npmCollection);
+    transformNpmUrl(fileCollection);
     rollupNpm(moduleCollection);
 }
 
@@ -98,7 +98,6 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
                     fileName, //文件名
                     npmName: node.source.value,
                     node, //ast node
-                    specifiers, // 导入的关键字  from { a } from '@vue' , 则 specifiers 为['a']
                     vueScriptContent,
                     vueTemplateContent,
                     vueStyleContent,
@@ -108,23 +107,24 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
                     relativeUrl,
                 };
 
-                if (!npmCollection.get(node.source.value)) {
-                    npmCollection.set(node.source.value, [collectionData]);
-                } else {
-                    npmCollection.get(node.source.value).push(collectionData);
-                }
-
                 // 收集某个npm 导入了哪些方法
-                if (!moduleCollection.get(node.source.value)) {
-                    const newSet = new Set();
-                    specifiers.forEach((item) => newSet.add(item));
-                    moduleCollection.set(node.source.value, newSet);
-                } else {
-                    const newSet = moduleCollection.get(node.source.value);
-                    specifiers.forEach((item) => newSet.add(item));
-                }
+                npmCollectionFunction(node.source.value, specifiers);
+
+                // 收集file内导入了哪些npm 方法
+                fileCollectionNpm(src, node.source.value, {
+                    dirSrc,
+                    fileName,
+                    relativeUrl: path.relative(dirSrc, 'src/rollup_modules/'),
+                    fileContent: file,
+                    vueScriptContent,
+                    vueTemplateContent,
+                    vueStyleContent,
+                    extName,
+                });
+
                 return false;
             } catch (error) {
+                console.log(error);
                 let val = node.source.value;
                 if (path.extname(val) !== '.js') {
                     val += '.js';
@@ -141,6 +141,28 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
         //  循环搜集依赖
         collectMap(item);
     });
+}
+
+function npmCollectionFunction(npmName, specifiers) {
+    if (!moduleCollection.get(npmName)) {
+        const newSet = new Set();
+        specifiers.forEach((item) => newSet.add(item));
+        moduleCollection.set(npmName, newSet);
+    } else {
+        const newSet = moduleCollection.get(npmName);
+        specifiers.forEach((item) => newSet.add(item));
+    }
+}
+
+function fileCollectionNpm(fileSrc, npmName, otherData) {
+    if (!fileCollection.get(fileSrc)) {
+        const newSet = new Set();
+        newSet.add(npmName);
+        fileCollection.set(fileSrc, Object.assign({ npm: newSet }, otherData));
+    } else {
+        const newSet = fileCollection.get(fileSrc).npm;
+        newSet.add(npmName);
+    }
 }
 
 /**
@@ -170,30 +192,6 @@ export function writeVueToMiniProgram(fileName, dirSrc, scriptContent, templateC
 }
 
 function rollupNpm(moduleList) {
-    // npmList.forEach((val, key) => {
-    //     let node = null;
-    //     let specifiers = [];
-
-    //     val.forEach((data) => {
-    //         data.node.type = 'ExportNamedDeclaration';
-    //         node = data.node;
-    //         specifiers = [...specifiers, ...data.specifiers];
-    //     });
-
-    //     const b = types.builders;
-    //     node.specifiers = [...new Set(specifiers)].map((item) => b.importSpecifier(b.identifier(item)));
-    //     console.log(node);
-    //     const test = recastParse(`export {a} from 'vue'`);
-    //     test.program.body[0].specifiers = [b.importSpecifier(b.identifier('s'))];
-    //     test.program.body[0].source = b.literal('vue');
-    //     console.log(print(test).code);
-    //     const id = `./rollupTmp-${Math.ceil(Math.random() * 10000)}.js`;
-    //     writeFileSync(id, print(node).code);
-    //     rollupBuild(id, key).then((url) => {
-    //         rmSync(id);
-    //     });
-    // });
-
     moduleList.forEach((val, key) => {
         const b = types.builders;
         const specifiers = [...val].map((item) => b.importSpecifier(b.identifier(item)));
@@ -208,34 +206,31 @@ function rollupNpm(moduleList) {
             rmSync(id);
         });
     });
-
-    // moduleCollection.forEach()
 }
 
-function transformNpmUrl(npmList) {
-    npmList.forEach((val, key) => {
-        val.forEach((data) => {
-            const ast = recastParse(data.fileContent);
+function transformNpmUrl(fileList) {
+    fileList.forEach((data, src) => {
+        const ast = recastParse(data.fileContent);
 
-            visit(ast, {
-                visitImportDeclaration(path) {
-                    const node = path.node;
-                    if (data.npmName == node.source.value) {
-                        node.source.value = data.relativeUrl;
-                        path.replace(node);
-                    }
-                    return false;
-                },
-            });
-
-            if (data.extName == '.js') {
-                writeJsToMiniProgram(data.src, print(ast).code);
-            }
-
-            if (data.extName == '.vue') {
-                writeVueToMiniProgram(data.fileName, data.dirSrc, print(ast).code, data.vueTemplateContent, data.vueStyleContent);
-            }
+        visit(ast, {
+            visitImportDeclaration(p) {
+                const node = p.node;
+                console.log(data.npm.has(node.source.value), 'node.source.value', node.source.value);
+                if (data.npm.has(node.source.value)) {
+                    node.source.value = path.join(data.relativeUrl, node.source.value);
+                    p.replace(node);
+                }
+                return false;
+            },
         });
+
+        if (data.extName == '.js') {
+            writeJsToMiniProgram(data.src, print(ast).code);
+        }
+
+        if (data.extName == '.vue') {
+            writeVueToMiniProgram(data.fileName, data.dirSrc, print(ast).code, data.vueTemplateContent, data.vueStyleContent);
+        }
     });
 }
 
