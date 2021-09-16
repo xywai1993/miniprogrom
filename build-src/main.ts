@@ -5,7 +5,7 @@ import { isNpmModule } from './util.js';
 import { build as rollupBuild } from './rollup.js';
 import { transformSync } from '@babel/core';
 import glob from 'glob';
-import path from 'path';
+import path from 'path/posix';
 import { startTask } from '@yiper.fan/taskbuild';
 
 const targetDir = 'miniprogram';
@@ -277,6 +277,7 @@ function transformNpmUrl(
                 const node = p.node;
 
                 if (data.npm.has(node.source.value)) {
+                    // node.source.value = path.join(data.relativeUrl, String(node.source.value) || '');
                     node.source.value = path.join(data.relativeUrl, String(node.source.value) || '');
                     p.replace(node);
                 }

@@ -8,7 +8,6 @@
     </view>
 </template>
 <script>
-//index.js
 const app = getApp();
 import { reactive, isProxy, computed, effect } from '@vue/reactivity';
 import { map } from 'underscore';
@@ -20,7 +19,7 @@ const data = reactive({
 });
 
 const d = isProxy(data);
-console.log('几次呢/1111/32222');
+
 Page({
     data: data,
     onLoad() {
