@@ -4,13 +4,15 @@
     "dependencies": {
         "@babel/core": "^7.15.5",
         "@babel/plugin-transform-modules-commonjs": "^7.15.4",
+        "@rollup/plugin-commonjs": "^20.0.0",
         "@vue/compiler-sfc": "^3.2.11",
         "@vue/reactivity": "^3.2.11",
         "@yiper.fan/taskbuild": "^0.0.18",
         "glob": "^7.1.7",
         "node-watch": "^0.7.1",
         "recast": "^0.20.5",
-        "rollup": "^2.56.3"
+        "rollup": "^2.56.3",
+        "rollup-plugin-node-resolve": "^5.2.0"
     },
     "scripts": {
         "dev": "node build/main.js",
@@ -18,7 +20,7 @@
         "watch": "node build/watch.js"
     },
     "devDependencies": {
-        "@rollup/plugin-commonjs": "^20.0.0",
-        "rollup-plugin-node-resolve": "^5.2.0"
+        "@types/underscore": "^1.11.3",
+        "underscore": "^1.13.1"
     }
 }

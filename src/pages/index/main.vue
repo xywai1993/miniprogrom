@@ -11,7 +11,9 @@
 //index.js
 const app = getApp();
 import { reactive, isProxy, computed, effect } from '@vue/reactivity';
+import { map } from 'underscore';
 
+console.log(map);
 const data = reactive({
     textNum: 0,
     arr: new Array(10).fill(1),

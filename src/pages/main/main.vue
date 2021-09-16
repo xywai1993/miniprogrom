@@ -9,31 +9,32 @@
 </template>
 <script>
 //index.js
-const app = getApp();
-import { ref, effect, reactive, computed, readonly, isReadonly } from '@vue/reactivity';
-import { test1 } from '../../util/test2';
-test1();
-const data = reactive({
-    textNum: 0,
-    arr: new Array(10).fill(1),
-    add: computed(() => data.textNum + 1),
-});
+// const app = getApp();
+// import { ref, effect, reactive, computed, readonly, isReadonly } from '@vue/reactivity';
+// import { test1 } from '../../util/test2';
 
-const read = readonly({ a: 1 });
+// test1();
+// const data = reactive({
+//     textNum: 0,
+//     arr: new Array(10).fill(1),
+//     add: computed(() => data.textNum + 1),
+// });
 
-Page({
-    data: data,
-    onLoad() {
-        const that = this;
-        effect(() => {
-            that.setData(data);
-        });
-    },
+// const read = readonly({ a: 1 });
 
-    changeNum() {
-        data.textNum = data.textNum + 1;
-    },
-});
+// Page({
+//     data: data,
+//     onLoad() {
+//         const that = this;
+//         effect(() => {
+//             that.setData(data);
+//         });
+//     },
+
+//     changeNum() {
+//         data.textNum = data.textNum + 1;
+//     },
+// });
 </script>
 
 <style>
