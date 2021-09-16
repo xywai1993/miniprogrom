@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "strict": true,
+        "sourceMap": false,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "lib": ["esnext", "dom"],
+        "outDir": "./build",
+        "rootDir": "./build-src"
+    },
+    "include": ["build-src/**/*.ts", "build-src/**/*.d.ts"]
+}
