@@ -1,7 +1,8 @@
 import { ref } from '@vue/reactivity';
+import { test1 } from '../../util/test';
 export function test() {
     const demo = ref(1);
     return demo;
 }
 
-console.log('111100000222');
+console.log('home->01');

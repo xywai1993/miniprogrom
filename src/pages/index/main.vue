@@ -2,7 +2,7 @@
     <view class="container">
         <view>{{ textNum }}</view>
         <view>{{ add }}</view>
-        <button bindtap="changeNum" class="other-info">点我1122x111</button>
+        <button bindtap="changeNum" class="other-info">点我222</button>
 
         <view wx:for="{{ arr }}" wx:key="index">{{ index }}</view>
     </view>
@@ -13,7 +13,6 @@ const app = getApp();
 import { reactive, isProxy, computed, effect } from '@vue/reactivity';
 import { map } from 'underscore';
 
-console.log(map);
 const data = reactive({
     textNum: 0,
     arr: new Array(10).fill(1),

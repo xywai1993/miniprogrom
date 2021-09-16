@@ -1,5 +1,5 @@
-import { test1 } from './test2';
+export { test1 } from './test2';
 import { envList } from '../envList';
 
-test1();
 console.log(envList);
+console.log('helloworld-11');

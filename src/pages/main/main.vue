@@ -11,7 +11,8 @@
 const app = getApp();
 import { ref, effect, reactive, computed, readonly, isReadonly } from '@vue/reactivity';
 import { test1 } from '../../util/test2';
-
+import { test } from './home';
+test();
 test1();
 const data = reactive({
     textNum: 0,

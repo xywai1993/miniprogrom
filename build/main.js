@@ -30,13 +30,14 @@ export function watchVueFile(files) {
     files.forEach((item) => {
         parseVueFile(item);
     });
-    console.log({ fileCollection });
+    console.log({ fileCollection: fileCollection.size, moduleCollection, jsCollection });
     transformJs(jsCollection);
     transformNpmUrl(fileCollection);
     rollupNpm(moduleCollection);
 }
 
 export function watchJsFile(src) {
+    console.log({ fileCollection: fileCollection.size, moduleCollection, jsCollection });
     collectMap(src);
     transformJs(jsCollection);
     transformNpmUrl(fileCollection);
@@ -44,12 +45,7 @@ export function watchJsFile(src) {
 }
 
 export function parseVueFile(src) {
-    const file = readFileSync(src, { encoding: 'utf-8' });
-    const result = vueSFCParse(file);
-    const templateContent = result.descriptor.template.content;
-    const styleContent = result.descriptor.styles[0].content;
-    const script = compileScript(result.descriptor, { refTransform: false, id: 'demo' });
-    const scriptContent = script.content;
+    const { scriptContent, styleContent, templateContent } = useVueSFC(src);
 
     // 收集依赖
     collectMap(src, scriptContent, templateContent, styleContent);
@@ -58,6 +54,21 @@ export function parseVueFile(src) {
     const dirSrc = path.dirname(src);
     const fileName = path.basename(src, '.vue');
     writeVueToMiniProgram(fileName, dirSrc, scriptContent, templateContent, styleContent);
+}
+
+function useVueSFC(src) {
+    const file = readFileSync(src, { encoding: 'utf-8' });
+    const result = vueSFCParse(file);
+    const templateContent = result.descriptor.template.content;
+    const styleContent = result.descriptor.styles[0].content;
+    const script = compileScript(result.descriptor, { refTransform: false, id: 'demo' });
+    const scriptContent = script.content;
+
+    return {
+        templateContent,
+        styleContent,
+        scriptContent,
+    };
 }
 
 // 收集依赖
@@ -112,6 +123,7 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
 
                 // 收集file内导入了哪些npm
                 fileCollectionNpm(src, node.source.value, {
+                    src,
                     dirSrc,
                     fileName,
                     relativeUrl: path.relative(dirSrc, 'src/rollup_modules/'),
@@ -180,7 +192,6 @@ export function writeJsToMiniProgram(src, content) {
 }
 
 export function writeVueToMiniProgram(fileName, dirSrc, scriptContent, templateContent, styleContent) {
-    console.log({ fileName, dirSrc });
     const targetDirSrc = dirSrc.replace(/^src/, targetDir);
 
     const output = transformSync(scriptContent, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
@@ -199,7 +210,7 @@ function rollupNpm(moduleList) {
         const node = recastParse(`export {a} from 'b'`);
         node.program.body[0].specifiers = specifiers;
         node.program.body[0].source = b.literal(key);
-        console.log(print(node).code);
+
         const id = `./rollupTmp-${Math.ceil(Math.random() * 10000)}.js`;
         writeFileSync(id, print(node).code);
         rollupBuild(id, key).then((url) => {
@@ -210,12 +221,17 @@ function rollupNpm(moduleList) {
 
 function transformNpmUrl(fileList) {
     fileList.forEach((data, src) => {
-        const ast = recastParse(data.fileContent);
+        let file = readFileSync(src, { encoding: 'utf-8' });
+
+        if (data.extName == '.vue') {
+            file = useVueSFC(src).scriptContent;
+        }
+        const ast = recastParse(file);
 
         visit(ast, {
             visitImportDeclaration(p) {
                 const node = p.node;
-                console.log(data.npm.has(node.source.value), 'node.source.value', node.source.value);
+
                 if (data.npm.has(node.source.value)) {
                     node.source.value = path.join(data.relativeUrl, node.source.value);
                     p.replace(node);
@@ -225,6 +241,7 @@ function transformNpmUrl(fileList) {
         });
 
         if (data.extName == '.js') {
+            console.log(print(ast).code);
             writeJsToMiniProgram(data.src, print(ast).code);
         }
 
