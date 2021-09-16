@@ -3,3 +3,8 @@
 ## 进度
 
 -   [x] 先占个位
+-   [ ] cli
+-   [ ] typescript
+-   [ ] vue3
+-   [ ] pug
+-   [ ] postcss

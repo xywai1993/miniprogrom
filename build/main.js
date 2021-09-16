@@ -110,7 +110,7 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
                 // 收集某个npm 导入了哪些方法
                 npmCollectionFunction(node.source.value, specifiers);
 
-                // 收集file内导入了哪些npm 方法
+                // 收集file内导入了哪些npm
                 fileCollectionNpm(src, node.source.value, {
                     dirSrc,
                     fileName,
@@ -124,7 +124,7 @@ function collectMap(src, vueScriptContent, vueTemplateContent, vueStyleContent) 
 
                 return false;
             } catch (error) {
-                console.log(error);
+                // console.log(error);
                 let val = node.source.value;
                 if (path.extname(val) !== '.js') {
                     val += '.js';
