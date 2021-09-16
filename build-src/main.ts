@@ -127,7 +127,7 @@ function collectMap(src: string, vueScriptContent?: string, vueTemplateContent?:
                 fileCollectionNpm(src, npmName, {
                     src,
 
-                    relativeUrl: path.relative(dirSrc, 'src/rollup_modules/'),
+                    relativeUrl: path.relative(dirSrc, path.join(sourceDir, 'rollup_modules')),
                     fileContent: file,
                     vueScriptContent,
                     vueTemplateContent,
@@ -195,7 +195,7 @@ export function writeJsToMiniProgram(src: string, content?: string) {
     const file = readFileSync(src, { encoding: 'utf-8' });
     const output = transformSync(content || file, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
 
-    const targetSrc = path.join(targetDir, path.relative('src', src));
+    const targetSrc = path.join(targetDir, path.relative(sourceDir, src));
     const targetDirSrc = path.dirname(targetSrc);
 
     mkdirSync(targetDirSrc, { recursive: true });
@@ -207,7 +207,7 @@ export function writeJsToMiniProgram(src: string, content?: string) {
 export function writeVueToMiniProgram(src: string, scriptContent: string, templateContent: string, styleContent: string) {
     const { dirSrc, fileName } = usePathInfo(src);
     // const targetDirSrc = dirSrc.replace(/^src/, targetDir);
-    const targetDirSrc = path.join(targetDir, path.relative('src', dirSrc));
+    const targetDirSrc = path.join(targetDir, path.relative(sourceDir, dirSrc));
     // console.log(`${targetDir} - ${path.relative('src', dirSrc)}`);
 
     const output = transformSync(scriptContent, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
