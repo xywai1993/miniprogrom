@@ -14,7 +14,7 @@ import { test1 } from '../../util/test2';
 import { test } from './home';
 test();
 test1();
-console.log('main.vue-->02');
+console.log('main.vue-->1');
 const data = reactive({
     textNum: 0,
     arr: new Array(10).fill(1),

@@ -12,7 +12,7 @@ watch('./src/', { recursive: true }, function (evt, src) {
     console.log(`${src} changed. fileName:${fileName} extName: ${extName} `);
 
     if (extName == '.vue') {
-        watchVueFile([src]);
+        watchVueFile(src);
     }
 
     if (extName == '.js') {
@@ -21,17 +21,3 @@ watch('./src/', { recursive: true }, function (evt, src) {
         watchJsFile(src);
     }
 });
-
-// startTask({
-//     taskList: [
-//         {
-//             taskName: 'fileMove',
-//             params: {
-//                 root: './src',
-//                 deployTo: './dist',
-//                 cover: false,
-//                 extname: ['vue'],
-//             },
-//         },
-//     ],
-// });

@@ -7,29 +7,26 @@ import { transformSync } from '@babel/core';
 import glob from 'glob';
 import path from 'path';
 import { startTask } from '@yiper.fan/taskbuild';
-import { shallowRef } from '@vue/reactivity';
 
 const targetDir = 'miniprogram';
 rmSync(targetDir, { force: true, recursive: true });
 
-let moduleCollection: Map<string, Set<string>> = new Map();
-let jsCollection: Set<string> = new Set();
-let fileCollection: Map<string, any> = new Map();
+const moduleCollection: Map<string, Set<string>> = new Map();
+const jsCollection: Set<string> = new Set();
+const fileCollection: Map<string, any> = new Map();
 const allVueCollection: Set<string> = new Set();
 
+// 初始转换入口
 glob('src/**/*.vue', {}, function (er, files) {
     console.log({ files, where: 'glob 入口文件' });
 
     files.forEach((item) => allVueCollection.add(item));
-    watchVueFile(files);
-});
 
-export function watchVueFile(files: string[]) {
     files.forEach((item) => {
-        parseVueFile(item);
+        const { scriptContent, styleContent, templateContent } = useVueSFC(item);
+        // 收集依赖
+        collectMap(item, scriptContent, templateContent, styleContent);
     });
-
-    // console.log({ jsCollection, moduleCollection, fileCollection });
 
     transformJs(jsCollection);
     transformNpmUrl(fileCollection);
@@ -38,25 +35,49 @@ export function watchVueFile(files: string[]) {
     // 没有任何依赖则直接转为小程序
     allVueCollection.forEach((item) => {
         if (!fileCollection.has(item)) {
-            console.log('讲道理只执行一次');
             const { templateContent, styleContent, scriptContent } = useVueSFC(item);
             writeVueToMiniProgram(item, scriptContent, templateContent || '', styleContent);
         }
     });
-}
+});
 
-export function watchJsFile(src: string) {
-    collectMap(src);
-    transformJs(jsCollection);
-    transformNpmUrl(fileCollection);
-    rollupNpm(moduleCollection);
-}
-
-export function parseVueFile(src: string) {
+export function watchVueFile(src: string) {
     const { scriptContent, styleContent, templateContent } = useVueSFC(src);
 
     // 收集依赖
     collectMap(src, scriptContent, templateContent, styleContent);
+
+    if (!singeTransform(src)) {
+        writeVueToMiniProgram(src, scriptContent, templateContent, styleContent);
+    }
+}
+
+export function watchJsFile(src: string) {
+    collectMap(src);
+    if (!singeTransform(src)) {
+        writeJsToMiniProgram(src);
+    }
+}
+
+// 单页转换
+function singeTransform(src: string) {
+    let isTransform = false;
+    if (jsCollection.has(src)) {
+        isTransform = true;
+        // transformJs(jsCollection);
+        writeJsToMiniProgram(src);
+    }
+
+    if (fileCollection.has(src)) {
+        isTransform = true;
+        transformNpmUrl(fileCollection);
+    }
+
+    if (moduleCollection.has(src)) {
+        isTransform = true;
+        rollupNpm(moduleCollection);
+    }
+    return isTransform;
 }
 
 function useVueSFC(src: string) {
@@ -68,7 +89,7 @@ function useVueSFC(src: string) {
     const scriptContent = script.content;
 
     return {
-        templateContent,
+        templateContent: templateContent || '',
         styleContent,
         scriptContent,
     };
@@ -186,6 +207,8 @@ export function writeJsToMiniProgram(src: string, content?: string) {
 
     mkdirSync(dirSrc.replace(/^src/, targetDir), { recursive: true });
     writeFileSync(src.replace(/^src/, targetDir), output?.code || '', { encoding: 'utf-8' });
+
+    console.count('writeJsToMiniProgram');
 }
 
 export function writeVueToMiniProgram(src: string, scriptContent: string, templateContent: string, styleContent: string) {
@@ -199,6 +222,8 @@ export function writeVueToMiniProgram(src: string, scriptContent: string, templa
     writeFileSync(`${targetDirSrc}/${fileName}.js`, output?.code || '', { encoding: 'utf-8' });
     writeFileSync(`${targetDirSrc}/${fileName}.wxml`, templateContent, { encoding: 'utf-8' });
     writeFileSync(`${targetDirSrc}/${fileName}.wxss`, styleContent, { encoding: 'utf-8' });
+
+    console.count('writeVueToMiniProgram');
 }
 
 function rollupNpm(moduleList: Map<string, Set<string>>) {
@@ -216,6 +241,7 @@ function rollupNpm(moduleList: Map<string, Set<string>>) {
             rmSync(id);
         });
     });
+    console.count('rollupNpm');
 }
 
 function transformNpmUrl(
@@ -266,12 +292,17 @@ function transformNpmUrl(
             writeVueToMiniProgram(src, print(ast).code, data.vueTemplateContent || '', data.vueStyleContent || '');
         }
     });
+
+    console.count('transformNpmUrl');
+
+    // fileCollection.clear();
 }
 
 function transformJs(jsList: Set<string>) {
     jsList.forEach((item) => {
         writeJsToMiniProgram(item);
     });
+    // jsList.clear();
 }
 
 startTask({
