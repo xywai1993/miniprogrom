@@ -37,19 +37,7 @@ Page({
 </script>
 
 <style>
-.bg {
-    width: 100%;
-    background-color: #000;
-}
-
-image {
-    width: 100%;
-    vertical-align: middle;
-}
-
-.other-info {
-    color: #e09de7;
-    padding: 0 20rpx;
-    margin-top: 20rpx;
+.container {
+    background: #000;
 }
 </style>

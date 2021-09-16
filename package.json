@@ -18,7 +18,7 @@
     },
     "scripts": {
         "dev": "node --loader ts-node/esm build-src/main.ts",
-        "watch": "npm run tsc && node build/watch.js",
+        "watch": "node --loader ts-node/esm build-src/watch.js",
         "tsc": "tsc"
     },
     "devDependencies": {

@@ -1,6 +1,6 @@
 import watch from 'node-watch';
 import path from 'path';
-import { parseVueFile, writeJsToMiniProgram, watchVueFile, watchJsFile } from './main.js';
+import { watchVueFile, watchJsFile } from './main.js';
 
 watch('./src/', { recursive: true }, function (evt, src) {
     if (!src) {

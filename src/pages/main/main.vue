@@ -14,6 +14,7 @@ import { test1 } from '../../util/test2';
 import { test } from './home';
 test();
 test1();
+console.log('main.vue-->02');
 const data = reactive({
     textNum: 0,
     arr: new Array(10).fill(1),
@@ -38,19 +39,7 @@ Page({
 </script>
 
 <style>
-.bg {
-    width: 100%;
-    background-color: #000;
-}
-
-image {
-    width: 100%;
-    vertical-align: middle;
-}
-
-.other-info {
-    color: #e09de7;
-    padding: 0 20rpx;
-    margin-top: 20rpx;
+.container {
+    background: #ff5500;
 }
 </style>
