@@ -1,7 +1,7 @@
 import { visit, parse as recastParse, print, types } from 'recast';
 import { parse as vueSFCParse, compileScript } from '@vue/compiler-sfc';
 import { readFileSync, writeFileSync, mkdirSync, rmSync, rmdirSync } from 'fs';
-import { isNpmModule } from './util.js';
+import { isNpmModule, usePathInfo } from './util.js';
 import { build as rollupBuild } from './rollup.js';
 import { transformSync } from '@babel/core';
 import glob from 'glob';
@@ -9,6 +9,7 @@ import path from 'path/posix';
 import { startTask } from '@yiper.fan/taskbuild';
 
 const targetDir = 'miniprogram';
+const sourceDir = 'src';
 rmSync(targetDir, { force: true, recursive: true });
 
 const moduleCollection: Map<string, Set<string>> = new Map();
@@ -97,18 +98,13 @@ function useVueSFC(src: string) {
 
 // 收集依赖
 function collectMap(src: string, vueScriptContent?: string, vueTemplateContent?: string, vueStyleContent?: string) {
-    const dirSrc = path.dirname(src);
+    const { dirSrc, extName, fileName } = usePathInfo(src);
     let file = readFileSync(src, { encoding: 'utf-8' });
-    let fileName = '';
-    const extName = path.extname(src);
 
     const collection: string[] = [];
 
     if (extName === '.vue') {
         file = vueScriptContent || '';
-        fileName = path.basename(src, '.vue');
-    } else {
-        fileName = path.basename(src, '.js');
     }
 
     const recastAst = recastParse(file);
@@ -130,14 +126,12 @@ function collectMap(src: string, vueScriptContent?: string, vueTemplateContent?:
                 // 收集file内导入了哪些npm
                 fileCollectionNpm(src, npmName, {
                     src,
-                    dirSrc,
-                    fileName,
+
                     relativeUrl: path.relative(dirSrc, 'src/rollup_modules/'),
                     fileContent: file,
                     vueScriptContent,
                     vueTemplateContent,
                     vueStyleContent,
-                    extName,
                 });
             } else {
                 // console.log(error);
@@ -175,14 +169,11 @@ function fileCollectionNpm(
     npmName: string,
     otherData: {
         src: string;
-        dirSrc: string;
-        fileName: string;
         relativeUrl: string;
         fileContent: string;
         vueScriptContent: string | undefined;
         vueTemplateContent: string | undefined;
         vueStyleContent: string | undefined;
-        extName: string;
     }
 ) {
     if (!fileCollection.get(fileSrc)) {
@@ -201,20 +192,23 @@ function fileCollectionNpm(
  * @param {string} [content] 文件内容，
  */
 export function writeJsToMiniProgram(src: string, content?: string) {
-    const dirSrc = path.dirname(src);
     const file = readFileSync(src, { encoding: 'utf-8' });
     const output = transformSync(content || file, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
 
-    mkdirSync(dirSrc.replace(/^src/, targetDir), { recursive: true });
-    writeFileSync(src.replace(/^src/, targetDir), output?.code || '', { encoding: 'utf-8' });
+    const targetSrc = path.join(targetDir, path.relative('src', src));
+    const targetDirSrc = path.dirname(targetSrc);
+
+    mkdirSync(targetDirSrc, { recursive: true });
+    writeFileSync(targetSrc, output?.code || '', { encoding: 'utf-8' });
 
     console.count('writeJsToMiniProgram');
 }
 
 export function writeVueToMiniProgram(src: string, scriptContent: string, templateContent: string, styleContent: string) {
-    const dirSrc = path.dirname(src);
-    const fileName = path.basename(src, '.vue');
-    const targetDirSrc = dirSrc.replace(/^src/, targetDir);
+    const { dirSrc, fileName } = usePathInfo(src);
+    // const targetDirSrc = dirSrc.replace(/^src/, targetDir);
+    const targetDirSrc = path.join(targetDir, path.relative('src', dirSrc));
+    // console.log(`${targetDir} - ${path.relative('src', dirSrc)}`);
 
     const output = transformSync(scriptContent, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
 
@@ -249,22 +243,20 @@ function transformNpmUrl(
         string,
         {
             src: string;
-            dirSrc: string;
-            fileName: string;
             relativeUrl: string;
             fileContent: string;
             vueScriptContent: string | undefined;
             vueTemplateContent: string | undefined;
             vueStyleContent: string | undefined;
-            extName: string;
             npm: Set<any>;
         }
     >
 ) {
     fileList.forEach((data, src) => {
+        const { extName } = usePathInfo(src);
         let file = readFileSync(src, { encoding: 'utf-8' });
 
-        if (data.extName == '.vue') {
+        if (extName == '.vue') {
             const vue = useVueSFC(src);
             file = vue.scriptContent;
             data.vueTemplateContent = vue.templateContent;
@@ -285,11 +277,11 @@ function transformNpmUrl(
             },
         });
 
-        if (data.extName == '.js') {
+        if (extName == '.js') {
             writeJsToMiniProgram(src, print(ast).code);
         }
 
-        if (data.extName == '.vue') {
+        if (extName == '.vue') {
             writeVueToMiniProgram(src, print(ast).code, data.vueTemplateContent || '', data.vueStyleContent || '');
         }
     });
