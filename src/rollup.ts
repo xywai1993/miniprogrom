@@ -1,6 +1,6 @@
 // const rollup = require('rollup');
 import { rollup } from 'rollup';
-import resolve from 'rollup-plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 
 // see below for details on the options

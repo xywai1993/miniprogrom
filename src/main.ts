@@ -36,8 +36,6 @@ glob(`${sourceDir}/**/*.vue`, {}, function (er, files) {
         collectMap(item);
     });
 
-    console.log({ fileCollection: Array.of(fileCollection.keys()) });
-
     transformFiles(fileCollection);
     rollupNpm(moduleCollection);
 
