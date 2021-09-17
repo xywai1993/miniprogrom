@@ -15,7 +15,18 @@ rmSync(targetDir, { force: true, recursive: true });
 
 const moduleCollection: Map<string, Set<string>> = new Map();
 const jsCollection: Set<string> = new Set();
-const fileCollection: Map<string, any> = new Map();
+const fileCollection: Map<
+    string,
+    {
+        src: string;
+        relativeUrl: string;
+        fileContent: string;
+        vueScriptContent: string | undefined;
+        vueTemplateContent: string | undefined;
+        vueStyleContent: string | undefined;
+        npm: Set<string>;
+    }
+> = new Map();
 const allVueCollection: Set<string> = new Set();
 
 // 初始转换入口
@@ -74,11 +85,11 @@ function singeTransform(src: string) {
         newMap.set(src, fileData);
         transformNpmUrl(newMap);
 
-        const npm = fileData.npm;
+        const npm = fileData?.npm;
 
         const newModules = new Map();
 
-        npm.forEach((item: string) => {
+        npm?.forEach((item) => {
             newModules.set(item, moduleCollection.get(item));
         });
 
@@ -196,12 +207,12 @@ function fileCollectionNpm(
     }
 ) {
     if (!fileCollection.get(fileSrc)) {
-        const newSet = new Set();
+        const newSet: Set<string> = new Set();
         newSet.add(npmName);
         fileCollection.set(fileSrc, Object.assign({ npm: newSet }, otherData));
     } else {
-        const newSet = fileCollection.get(fileSrc).npm;
-        newSet.add(npmName);
+        const newSet = fileCollection.get(fileSrc)?.npm;
+        newSet?.add(npmName);
     }
 }
 
