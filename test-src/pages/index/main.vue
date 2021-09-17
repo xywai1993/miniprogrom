@@ -15,7 +15,7 @@ import { map } from 'underscore';
 const data = reactive({
     textNum: 0,
     arr: new Array(10).fill(1),
-    add: computed(() => data.textNum + 1),
+    add: computed(() => data.textNum + 10),
 });
 
 const d = isProxy(data);

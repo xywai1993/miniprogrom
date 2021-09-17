@@ -1,8 +1,8 @@
 import watch from 'node-watch';
 import path from 'path';
-import { watchVueFile, watchJsFile } from './main.js';
+import { watchVueFile, watchJsFile, sourceDir } from './main.js';
 
-watch('./src/', { recursive: true }, function (evt, src) {
+watch(sourceDir, { recursive: true }, function (evt, src) {
     if (!src) {
         return;
     }
