@@ -2,26 +2,25 @@
     <view class="container">
         <view>{{ textNum }}</view>
         <view>{{ add }}</view>
-        <button bindtap="changeNum">点我1122x111</button>
+        <button bindtap="changeNum">点我111</button>
 
         <view wx:for="{{ arr }}" wx:key="index">{{ index }}</view>
     </view>
 </template>
 <script>
 const app = getApp();
-import { ref, effect, reactive, computed, readonly, isReadonly } from '@vue/reactivity';
+import { ref, effect, reactive, computed } from '@vue/reactivity';
+import { map } from 'underscore';
 import { test1 } from '../../util/test2';
 import { test } from './home';
 test();
 test1();
-console.log('main.vue-->1');
+console.log('main.vue-->129998');
 const data = reactive({
     textNum: 0,
     arr: new Array(10).fill(1),
     add: computed(() => data.textNum + 1),
 });
-
-const read = readonly({ a: 1 });
 
 Page({
     data: data,

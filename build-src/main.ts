@@ -1,13 +1,14 @@
 import { visit, parse as recastParse, print, types } from 'recast';
 import { parse as vueSFCParse, compileScript } from '@vue/compiler-sfc';
 import { readFileSync, writeFileSync, mkdirSync, rmSync, rmdirSync } from 'fs';
-import { isNpmModule, usePathInfo } from './util.js';
+import { intersection, isNpmModule, usePathInfo } from './util.js';
 import { build as rollupBuild } from './rollup.js';
 import { transformSync } from '@babel/core';
 import glob from 'glob';
 import path from 'path/posix';
 import { startTask } from '@yiper.fan/taskbuild';
 
+console.time('program');
 const targetDir = 'miniprogram';
 const sourceDir = 'src';
 rmSync(targetDir, { force: true, recursive: true });
@@ -40,6 +41,7 @@ glob('src/**/*.vue', {}, function (er, files) {
             writeVueToMiniProgram(item, scriptContent, templateContent || '', styleContent);
         }
     });
+    console.timeEnd('program');
 });
 
 export function watchVueFile(src: string) {
@@ -63,21 +65,35 @@ export function watchJsFile(src: string) {
 // 单页转换
 function singeTransform(src: string) {
     let isTransform = false;
-    if (jsCollection.has(src)) {
-        isTransform = true;
-        // transformJs(jsCollection);
-        writeJsToMiniProgram(src);
-    }
 
     if (fileCollection.has(src)) {
         isTransform = true;
-        transformNpmUrl(fileCollection);
+        // transformNpmUrl(fileCollection);
+        const newMap = new Map();
+        const fileData = fileCollection.get(src);
+        newMap.set(src, fileData);
+        transformNpmUrl(newMap);
+
+        const npm = fileData.npm;
+
+        const newModules = new Map();
+
+        npm.forEach((item: string) => {
+            newModules.set(item, moduleCollection.get(item));
+        });
+
+        console.log(newModules);
+
+        rollupNpm(newModules);
+
+        return isTransform;
     }
 
-    if (moduleCollection.has(src)) {
+    if (jsCollection.has(src)) {
         isTransform = true;
-        rollupNpm(moduleCollection);
+        writeJsToMiniProgram(src);
     }
+
     return isTransform;
 }
 
@@ -109,6 +125,9 @@ function collectMap(src: string, vueScriptContent?: string, vueTemplateContent?:
 
     const recastAst = recastParse(file);
     // const b = types.builders;
+
+    // 元素置空，从新收集
+    fileCollection.delete(src);
 
     visit(recastAst, {
         visitImportDeclaration(data) {
