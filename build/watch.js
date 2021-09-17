@@ -25,4 +25,3 @@ export function watchSourceAndBuild(sourceDir, targetDir) {
     });
 }
 // watchSourceAndBuild(sourceDir, targetDir);
-//# sourceMappingURL=watch.js.map

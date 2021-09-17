@@ -32,4 +32,3 @@ export async function build(input, key) {
     return outputOptions.file;
 }
 // build();
-//# sourceMappingURL=rollup.js.map
