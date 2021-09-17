@@ -17,8 +17,8 @@
         "typescript": "^4.4.3"
     },
     "scripts": {
-        "dev": "node --loader ts-node/esm build-src/main.ts",
-        "watch": "node --loader ts-node/esm build-src/watch.js",
+        "dev": "node --loader ts-node/esm src/main.ts",
+        "watch": "node --loader ts-node/esm src/watch.ts",
         "tsc": "tsc"
     },
     "devDependencies": {

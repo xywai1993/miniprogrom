@@ -10,7 +10,7 @@ import { startTask } from '@yiper.fan/taskbuild';
 
 console.time('program');
 const targetDir = 'miniprogram';
-const sourceDir = 'src';
+const sourceDir = 'test-src';
 rmSync(targetDir, { force: true, recursive: true });
 
 const moduleCollection: Map<string, Set<string>> = new Map();
@@ -19,7 +19,7 @@ const fileCollection: Map<string, any> = new Map();
 const allVueCollection: Set<string> = new Set();
 
 // 初始转换入口
-glob('src/**/*.vue', {}, function (er, files) {
+glob(`${sourceDir}/**/*.vue`, {}, function (er, files) {
     console.log({ files, where: 'glob 入口文件' });
 
     files.forEach((item) => allVueCollection.add(item));
@@ -323,7 +323,7 @@ startTask({
             taskName: 'htmlMove',
             params: {
                 deployTo: targetDir,
-                root: 'src',
+                root: sourceDir,
                 extname: ['json'],
             },
         },
