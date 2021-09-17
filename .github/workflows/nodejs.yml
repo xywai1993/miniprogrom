@@ -4,11 +4,11 @@ on:
     push:
         branches:
             - master
-    pull_request:
-        branches:
-            - master
-            # tags:
-            #     - 'npm*'
+    # pull_request:
+    #     branches:
+    #         - master
+    # tags:
+    #     - 'npm*'
 
 jobs:
     # test:
