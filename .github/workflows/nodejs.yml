@@ -54,7 +54,7 @@ jobs:
                   git config --global user.email 'yiper.fan@gmail.com'
                   git config --global user.name "xywai1993"
                   git add .
-                  git commit -am 'github action 提交..发布新版本'
+                  git commit -am 'github action 自动发布新版本'
 
             - name: 发布到npm
               # if: ${{ always() }}
