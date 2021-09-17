@@ -1,7 +1,7 @@
 {
     "pages": ["pages/index/main", "pages/main/main"],
     "window": {
-        "backgroundColor": "#000",
+        "backgroundColor": "#fff",
         "backgroundTextStyle": "light",
         "navigationBarBackgroundColor": "#F6F6F6",
         "navigationBarTitleText": "月圆中秋",

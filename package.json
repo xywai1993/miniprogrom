@@ -2,7 +2,7 @@
     "name": "@yiper.fan/mini-program-builder",
     "version": "0.0.1",
     "type": "module",
-    "main": "build/main.js",
+    "main": "build/watch.js",
     "author": "yiper.fan",
     "dependencies": {
         "@babel/core": "^7.15.5",
