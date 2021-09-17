@@ -1,23 +1,26 @@
+import { startTask } from '@yiper.fan/taskbuild';
 import watch from 'node-watch';
 import path from 'path';
-import { watchVueFile, watchJsFile, sourceDir } from './main.js';
+import { watchVueFile, watchJsFile, sourceDir, targetDir } from './main.js';
+import { copyFile } from 'fs/promises';
+import { usePathInfo } from './util.js';
 
 watch(sourceDir, { recursive: true }, function (evt, src) {
     if (!src) {
         return;
     }
-    const fileName = path.basename(src, '.vue');
-    const extName = path.extname(src);
-    const dirSrc = path.dirname(src);
-    console.log(`${src} changed. fileName:${fileName} extName: ${extName} `);
+
+    const { fileName, dirSrc, extName } = usePathInfo(src);
+    console.log(` changed success : ${src}  fileName:${fileName} extName: ${extName} `);
 
     if (extName == '.vue') {
         watchVueFile(src);
-    }
-
-    if (extName == '.js') {
-        // es6toes5(src);
-        // writeJsToMiniProgram(src);
+    } else if (extName == '.js') {
         watchJsFile(src);
+    } else {
+        const targetSrc = path.join(targetDir, path.relative(sourceDir, src));
+        copyFile(src, targetSrc).then(() => {
+            console.log(`copyFile success : ${src}--->${targetSrc}`);
+        });
     }
 });

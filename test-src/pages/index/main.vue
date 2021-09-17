@@ -37,6 +37,6 @@ Page({
 
 <style>
 .container {
-    background: #000;
+    background: #fff;
 }
 </style>

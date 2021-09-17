@@ -1,10 +1,10 @@
 {
     "pages": ["pages/index/main", "pages/main/main"],
     "window": {
-        "backgroundColor": "#F5F5F5",
+        "backgroundColor": "#000",
         "backgroundTextStyle": "light",
         "navigationBarBackgroundColor": "#F6F6F6",
-        "navigationBarTitleText": "月圆中秋 茶礼相送",
+        "navigationBarTitleText": "月圆中秋",
         "navigationBarTextStyle": "black"
     },
     "sitemapLocation": "sitemap.json",

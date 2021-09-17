@@ -9,7 +9,7 @@ import path from 'path/posix';
 import { startTask } from '@yiper.fan/taskbuild';
 
 console.time('program');
-const targetDir = 'miniprogram';
+export const targetDir = 'miniprogram';
 export const sourceDir = 'test-src';
 rmSync(targetDir, { force: true, recursive: true });
 
@@ -279,7 +279,7 @@ startTask({
             params: {
                 deployTo: targetDir,
                 root: sourceDir,
-                extname: ['json'],
+                extname: ['.json'],
             },
         },
     ],
