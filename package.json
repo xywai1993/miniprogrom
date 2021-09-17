@@ -30,6 +30,15 @@
         "underscore": "^1.13.1",
         "typescript": "^4.4.3"
     },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/xywai1993/miniprogrom.git"
+    },
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/xywai1993/miniprogrom/issues"
+    },
+    "homepage": "https://github.com/xywai1993/miniprogrom#readme",
     "files": [
         "build"
     ]
