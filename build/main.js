@@ -14,11 +14,9 @@ rmSync(targetDir, { force: true, recursive: true });
 const moduleCollection = new Map();
 const jsCollection = new Set();
 const fileCollection = new Map();
-const allVueCollection = new Set();
 // 初始转换入口
 glob(`${sourceDir}/**/*.vue`, {}, function (er, files) {
     console.log({ files, where: 'glob 入口文件' });
-    files.forEach((item) => allVueCollection.add(item));
     files.forEach((item) => {
         // 收集依赖
         collectMap(item);

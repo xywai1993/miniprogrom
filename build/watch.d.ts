@@ -1,1 +1,4 @@
-export declare function watchSourceAndBuild(sourceDir: string, targetDir: string): void;
+export declare function watchSourceAndBuild({ sourceDir, targetDir }: {
+    sourceDir: string;
+    targetDir: string;
+}): void;
