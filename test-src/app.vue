@@ -15,7 +15,7 @@ App({
                 traceUser: true,
             });
         }
-        console.log('app->app');
+        console.log('app->app11111234567890');
 
         this.globalData = {};
     },
