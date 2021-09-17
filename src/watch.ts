@@ -4,7 +4,7 @@ import { watchVueFile, watchJsFile, sourceDir, targetDir } from './main.js';
 import { copyFile } from 'fs/promises';
 import { usePathInfo } from './util.js';
 
-export function watchSourceAndBuild(sourceDir: string, targetDir: string) {
+export function watchSourceAndBuild({ sourceDir, targetDir }: { sourceDir: string; targetDir: string }) {
     watch(sourceDir, { recursive: true }, function (evt, src) {
         if (!src) {
             return;

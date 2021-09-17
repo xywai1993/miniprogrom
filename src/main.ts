@@ -1,7 +1,7 @@
 import { visit, parse as recastParse, print, types } from 'recast';
-import { parse as vueSFCParse, compileScript } from '@vue/compiler-sfc';
+import { parse as vueSFCParse, compileScript, compileTemplate } from '@vue/compiler-sfc';
 import { readFileSync, writeFileSync, mkdirSync, rmSync, rmdirSync } from 'fs';
-import { intersection, isNpmModule, usePathInfo } from './util.js';
+import { isNpmModule, usePathInfo } from './util.js';
 import { build as rollupBuild } from './rollup.js';
 import { transformSync } from '@babel/core';
 import glob from 'glob';
@@ -23,13 +23,10 @@ const fileCollection: Map<
         npm: Set<string>;
     }
 > = new Map();
-const allVueCollection: Set<string> = new Set();
 
 // 初始转换入口
 glob(`${sourceDir}/**/*.vue`, {}, function (er, files) {
     console.log({ files, where: 'glob 入口文件' });
-
-    files.forEach((item) => allVueCollection.add(item));
 
     files.forEach((item) => {
         // 收集依赖
