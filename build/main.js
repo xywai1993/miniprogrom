@@ -23,7 +23,6 @@ glob(`${sourceDir}/**/*.vue`, {}, function (er, files) {
         // 收集依赖
         collectMap(item);
     });
-    console.log({ fileCollection: Array.of(fileCollection.keys()) });
     transformFiles(fileCollection);
     rollupNpm(moduleCollection);
     console.timeEnd('program');
