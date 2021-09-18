@@ -14,8 +14,31 @@ console.time('program');
 let targetDir = '';
 let sourceDir = '';
 
-// TODO: 记得删除
-// rmSync(targetDir, { force: true, recursive: true });
+type PreprocessLang = 'less' | 'sass' | 'scss' | 'styl' | 'stylus';
+type fileCollectionType =
+    | {
+          src: string;
+          jsAst: any;
+          npm: Set<string>;
+          extName: '.js';
+      }
+    | {
+          src: string;
+          jsAst: any;
+          npm: Set<string>;
+          extName: '.vue';
+          style: {
+              content: string;
+              lang: PreprocessLang | undefined;
+          };
+          template?: {
+              content: string;
+              lang: string | undefined;
+          };
+          config?: {
+              content: string;
+          };
+      };
 
 const moduleCollection: Map<string, Set<string>> = new Map();
 const jsCollection: Set<string> = new Set();
@@ -25,6 +48,7 @@ const fileCollection: Map<
         src: string;
         jsAst: any;
         npm: Set<string>;
+        extName: '.js';
     }
 > = new Map();
 
@@ -101,42 +125,39 @@ function singeTransform(src: string) {
     return isTransform;
 }
 
-interface sfcOption {
-    needCompileStyle: boolean;
-}
-function useVueSFC(src: string, option?: sfcOption) {
-    const { fileName } = usePathInfo(src);
-    const file = useFileContentSync(src);
-    const result = vueSFCParse(file);
-    const templateContent = result.descriptor.template?.content || '';
-    const style = result.descriptor.styles[0];
-    let styleContent = style?.content;
-    // const script = compileScript(result.descriptor, { refTransform: false, id: fileName });
-    const scriptContent = result.descriptor.script?.content || '';
-    const configContent = result.descriptor.customBlocks[0]?.content || '';
-
-    if (option?.needCompileStyle && style.lang) {
-        styleContent = compileStyle({ source: styleContent, filename: fileName, id: fileName, preprocessLang: 'less' }).code;
-    }
-
-    return {
-        templateContent,
-        styleContent,
-        scriptContent,
-        configContent,
-    };
-}
-
 // 收集依赖
 function collectMap(src: string) {
+    // 元素置空，从新收集
+    fileCollection.delete(src);
     const { dirSrc, extName, fileName } = usePathInfo(src);
     let file = '';
 
     const collection: string[] = [];
 
+    const collectionData: fileCollectionType = {
+        npm: new Set() as Set<string>,
+        src,
+        jsAst: '',
+        extName: '.js',
+    };
+
     if (extName === '.vue') {
-        const { scriptContent } = useVueSFC(src);
+        const { scriptContent, templateContent, configContent, style } = useVueSFC(src);
         file = scriptContent;
+        Object.assign(collectionData, {
+            extName: '.vue',
+            style: {
+                content: style.content,
+                lang: style.lang,
+            },
+            template: {
+                content: templateContent,
+                lang: undefined,
+            },
+            config: {
+                content: configContent,
+            },
+        });
     } else {
         file = useFileContentSync(src);
     }
@@ -144,14 +165,7 @@ function collectMap(src: string) {
     const recastAst = recastParse(file);
     // const b = types.builders;
 
-    // 元素置空，从新收集
-    fileCollection.delete(src);
-
-    const collectionData = {
-        npm: new Set() as Set<string>,
-        jsAst: recastAst,
-        src,
-    };
+    collectionData.jsAst = recastAst;
 
     visit(recastAst, {
         visitImportDeclaration(data) {
@@ -255,18 +269,9 @@ export async function writeVueToMiniProgram(src: string, scriptContent: string, 
     }
 }
 
-function transformFiles(
-    fileList: Map<
-        string,
-        {
-            src: string;
-            jsAst: any;
-            npm: Set<string>;
-        }
-    >
-) {
+function transformFiles(fileList: Map<string, fileCollectionType>) {
     fileList.forEach((data, src) => {
-        const { extName, dirSrc } = usePathInfo(src);
+        const { dirSrc, fileName } = usePathInfo(src);
 
         // const ast = recastParse(file);
         const ast = data.jsAst;
@@ -286,13 +291,18 @@ function transformFiles(
             },
         });
 
-        if (extName == '.js') {
+        if (data.extName == '.js') {
             writeJsToMiniProgram(src, print(ast).code);
         }
 
-        if (extName == '.vue') {
-            const { templateContent, styleContent, configContent } = useVueSFC(src, { needCompileStyle: true });
-            writeVueToMiniProgram(src, print(ast).code, templateContent, styleContent, configContent);
+        if (data.extName == '.vue') {
+            let styleContent = data.style.content;
+
+            if (data.style.lang) {
+                styleContent = useCompileStyle({ styleContent: data.style.content, fileName, lang: data.style.lang }).code;
+            }
+
+            writeVueToMiniProgram(src, print(ast).code, data.template?.content, styleContent, data.config?.content);
         }
     });
 }
@@ -318,9 +328,46 @@ function rollupNpm(moduleList: Map<string, Set<string>>) {
     });
 }
 
+interface sfcOption {
+    needCompileStyle: boolean;
+}
+function useVueSFC(src: string, option?: sfcOption) {
+    const { fileName } = usePathInfo(src);
+    const file = useFileContentSync(src);
+    const result = vueSFCParse(file);
+    const template = result.descriptor.template;
+    const templateContent = template?.content || '';
+    const style = result.descriptor.styles[0];
+    let styleContent = style?.content;
+    // const script = compileScript(result.descriptor, { refTransform: false, id: fileName });
+    const scriptContent = result.descriptor.script?.content || '';
+    const configContent = result.descriptor.customBlocks[0]?.content || '';
+
+    if (option?.needCompileStyle && style.lang) {
+        styleContent = compileStyle({ source: styleContent, filename: fileName, id: fileName, preprocessLang: 'less' }).code;
+    }
+
+    return {
+        templateContent,
+        styleContent,
+        scriptContent,
+        configContent,
+        style,
+    };
+}
+
+function useCompileStyle({ styleContent, fileName, lang }: { styleContent: string; fileName: string; lang: PreprocessLang }) {
+    return compileStyle({ source: styleContent, filename: fileName, id: fileName, preprocessLang: lang });
+}
+
 function useFileContentSync(src: string) {
     console.count(`useFileContentSync-->${src}`);
-    return readFileSync(src, { encoding: 'utf-8' });
+    try {
+        return readFileSync(src, { encoding: 'utf-8' });
+    } catch (error) {
+        console.log(`${src}读取失败`);
+        return '';
+    }
 }
 
 async function useEs6toCommonjs(content: string) {

@@ -3,4 +3,4 @@ export function test1() {
     console.log(12);
 }
 
-console.log('test2->009111');
+console.log('test2->009111134');
