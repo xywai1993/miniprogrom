@@ -9,10 +9,8 @@
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "lib": ["esnext", "dom"],
-        "outDir": "./build",
-        "rootDir": "./src",
+        "rootDir": "./",
+        "allowJs": true,
         "typeRoots": ["./node_modules/@types"]
-    },
-    "include": ["src/**/*.ts", "src/**/*.d.ts", "src/test/index.test.mjs"],
-    "exclude": ["src/test/**/*.ts"]
+    }
 }

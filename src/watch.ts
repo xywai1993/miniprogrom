@@ -1,10 +1,20 @@
 import watch from 'node-watch';
 import path from 'path';
-import { watchVueFile, watchJsFile, sourceDir, targetDir } from './main.js';
+import { watchVueFile, watchJsFile, main } from './main.js';
 import { copyFile } from 'fs/promises';
 import { usePathInfo } from './util.js';
+import { rmSync } from 'fs';
 
-export function watchSourceAndBuild({ sourceDir, targetDir }: { sourceDir: string; targetDir: string }) {
+interface options {
+    sourceDir: string;
+    targetDir: string;
+}
+
+export function watchSourceAndBuild({ sourceDir, targetDir }: options) {
+    rmSync(targetDir, { force: true, recursive: true });
+
+    main(sourceDir, targetDir);
+
     watch(sourceDir, { recursive: true }, function (evt, src) {
         if (!src) {
             return;
@@ -24,4 +34,4 @@ export function watchSourceAndBuild({ sourceDir, targetDir }: { sourceDir: strin
     });
 }
 
-// watchSourceAndBuild(sourceDir, targetDir);
+watchSourceAndBuild({ sourceDir: 'test-src', targetDir: 'miniprogram' });
