@@ -9,8 +9,10 @@ import path from 'path/posix';
 import { startTask } from '@yiper.fan/taskbuild';
 
 console.time('program');
-export const targetDir = 'miniprogram';
-export const sourceDir = 'test-src';
+let targetDir = '';
+let sourceDir = '';
+
+// TODO: 记得删除
 rmSync(targetDir, { force: true, recursive: true });
 
 const moduleCollection: Map<string, Set<string>> = new Map();
@@ -25,19 +27,38 @@ const fileCollection: Map<
 > = new Map();
 
 // 初始转换入口
-glob(`${sourceDir}/**/*.vue`, {}, function (er, files) {
-    console.log({ files, where: 'glob 入口文件' });
 
-    files.forEach((item) => {
-        // 收集依赖
-        collectMap(item);
+export function main(source: string, target: string) {
+    sourceDir = source;
+    targetDir = target;
+    glob(`${sourceDir}/**/*.vue`, {}, function (er, files) {
+        console.log({ files, where: 'glob 入口文件' });
+
+        files.forEach((item) => {
+            // 收集依赖
+            collectMap(item);
+        });
+
+        transformFiles(fileCollection);
+        rollupNpm(moduleCollection);
+
+        console.timeEnd('program');
     });
 
-    transformFiles(fileCollection);
-    rollupNpm(moduleCollection);
-
-    console.timeEnd('program');
-});
+    // 默认转移
+    startTask({
+        taskList: [
+            {
+                taskName: 'htmlMove',
+                params: {
+                    deployTo: targetDir,
+                    root: sourceDir,
+                    extname: ['.json'],
+                },
+            },
+        ],
+    });
+}
 
 export function watchVueFile(src: string) {
     // 收集依赖
@@ -73,7 +94,6 @@ function singeTransform(src: string) {
         npm?.forEach((item) => {
             newModules.set(item, moduleCollection.get(item));
         });
-        console.log(newModules);
         rollupNpm(newModules);
     }
 
@@ -186,7 +206,7 @@ export function writeJsToMiniProgram(src: string, content?: string) {
     mkdirSync(targetDirSrc, { recursive: true });
     writeFileSync(targetSrc, output?.code || '', { encoding: 'utf-8' });
 
-    console.count('writeJsToMiniProgram');
+    console.count(`writeJsToMiniProgram-->${src}`);
 }
 
 export function writeVueToMiniProgram(src: string, scriptContent: string, templateContent: string, styleContent: string) {
@@ -199,7 +219,7 @@ export function writeVueToMiniProgram(src: string, scriptContent: string, templa
     writeFileSync(`${targetDirSrc}/${fileName}.wxml`, templateContent, { encoding: 'utf-8' });
     writeFileSync(`${targetDirSrc}/${fileName}.wxss`, styleContent, { encoding: 'utf-8' });
 
-    console.count('writeVueToMiniProgram');
+    console.count(`writeVueToMiniProgram-->${src}`);
 }
 
 function transformFiles(
@@ -212,7 +232,6 @@ function transformFiles(
         }
     >
 ) {
-    console.count('transformFiles');
     fileList.forEach((data, src) => {
         const { extName, dirSrc } = usePathInfo(src);
 
@@ -225,6 +244,7 @@ function transformFiles(
 
                 // 转换npm模块地址为相对地址
                 if (data.npm.has(String(node.source.value))) {
+                    console.count(`transformNpmUrl-->${node.source.value}`);
                     const relativeUrl = path.relative(dirSrc, path.join(sourceDir, 'rollup_modules'));
                     node.source.value = path.join(relativeUrl, String(node.source.value) || '');
                     p.replace(node);
@@ -258,24 +278,11 @@ function rollupNpm(moduleList: Map<string, Set<string>>) {
         rollupBuild(id, key).then((url) => {
             rmSync(id);
         });
-        console.count('rollupNpm');
+        console.count(`rollupNpm-->${key}`);
     });
 }
 
 function useFileContentSync(src: string) {
-    console.count('useFileContentSync');
+    console.count(`useFileContentSync-->${src}`);
     return readFileSync(src, { encoding: 'utf-8' });
 }
-
-startTask({
-    taskList: [
-        {
-            taskName: 'htmlMove',
-            params: {
-                deployTo: targetDir,
-                root: sourceDir,
-                extname: ['.json'],
-            },
-        },
-    ],
-});
