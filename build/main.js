@@ -16,6 +16,7 @@ const moduleCollection = new Map();
 const jsCollection = new Set();
 const fileCollection = new Map();
 // 初始转换入口
+
 export function main(source, target) {
     sourceDir = source;
     targetDir = target;
@@ -28,6 +29,7 @@ export function main(source, target) {
         transformFiles(fileCollection);
         rollupNpm(moduleCollection);
         console.timeEnd('program');
+
     });
     // 默认转移
     startTask({

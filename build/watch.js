@@ -3,10 +3,12 @@ import path from 'path';
 import { watchVueFile, watchJsFile, main } from './main.js';
 import { copyFile } from 'fs/promises';
 import { usePathInfo } from './util.js';
+
 import { rmSync } from 'fs';
 export function watchSourceAndBuild({ sourceDir, targetDir }) {
     rmSync(targetDir, { force: true, recursive: true });
     main(sourceDir, targetDir);
+
     watch(sourceDir, { recursive: true }, function (evt, src) {
         if (!src) {
             return;
