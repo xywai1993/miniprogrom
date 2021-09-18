@@ -15,11 +15,12 @@
         "glob": "^7.1.7",
         "node-watch": "^0.7.1",
         "recast": "^0.20.5",
-        "rollup": "^2.56.3"
+        "rollup": "^2.56.3",
+        "watch": "^1.0.2"
     },
     "scripts": {
         "dev": "cross-env NODE_ENV=development  node --loader ts-node/esm src/main.ts",
-        "watch": "node --loader ts-node/esm src/watch.ts",
+        "watch": "cross-env NODE_ENV=development node --loader ts-node/esm src/watch.ts",
         "tsc": "tsc",
         "test": "node --experimental-vm-modules node_modules/.bin/jest",
         "watch-pro": "node watch-file.js"
@@ -33,6 +34,7 @@
         "@types/jest": "^27.0.1",
         "@types/node": "^15.12.5",
         "@types/underscore": "^1.11.3",
+        "@types/watch": "^1.0.2",
         "@yiper.fan/mini-program-builder": "^0.0.3",
         "babel-jest": "^27.2.0",
         "cross-env": "^7.0.3",

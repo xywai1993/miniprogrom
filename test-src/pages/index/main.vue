@@ -9,7 +9,7 @@
 </template>
 <script>
 const app = getApp();
-import { reactive, isProxy, computed, effect } from '@vue/reactivity';
+import { reactive, isProxy, computed, effect, readonly } from '@vue/reactivity';
 import { map } from 'underscore';
 import { test1 } from '../../util/test2.js';
 
