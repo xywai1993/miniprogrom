@@ -6,5 +6,5 @@ export declare function watchJsFile(src: string): void;
  * @param {path} src 文件path
  * @param {string} [content] 文件内容，
  */
-export declare function writeJsToMiniProgram(src: string, content?: string): void;
-export declare function writeVueToMiniProgram(src: string, scriptContent: string, templateContent?: string, styleContent?: string, configContent?: string): void;
+export declare function writeJsToMiniProgram(src: string, content?: string): Promise<void>;
+export declare function writeVueToMiniProgram(src: string, scriptContent: string, templateContent?: string, styleContent?: string, configContent?: string): Promise<void>;
