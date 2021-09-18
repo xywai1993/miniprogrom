@@ -3,3 +3,4 @@ miniprogram
 project.config.json
 project.private.config.json
 .npmrc
+watch-file.js

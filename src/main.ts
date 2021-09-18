@@ -1,5 +1,5 @@
 import { visit, parse as recastParse, print, types } from 'recast';
-import { parse as vueSFCParse, compileScript, compileTemplate } from '@vue/compiler-sfc';
+import { parse as vueSFCParse, compileScript, compileTemplate, compileStyle } from '@vue/compiler-sfc';
 import { readFileSync, writeFileSync, mkdirSync, rmSync, rmdirSync } from 'fs';
 import { isNpmModule, usePathInfo } from './util.js';
 import { build as rollupBuild } from './rollup.js';
@@ -65,8 +65,8 @@ export function watchVueFile(src: string) {
     collectMap(src);
 
     if (!singeTransform(src)) {
-        const { scriptContent, templateContent, styleContent } = useVueSFC(src);
-        writeVueToMiniProgram(src, scriptContent, templateContent, styleContent);
+        const { scriptContent, templateContent, styleContent, configContent } = useVueSFC(src);
+        writeVueToMiniProgram(src, scriptContent, templateContent, styleContent, configContent);
     }
 }
 
@@ -101,17 +101,22 @@ function singeTransform(src: string) {
 }
 
 function useVueSFC(src: string) {
+    const { fileName } = usePathInfo(src);
     const file = useFileContentSync(src);
     const result = vueSFCParse(file);
-    const templateContent = result.descriptor.template?.content;
-    const styleContent = result.descriptor.styles[0].content;
+    const templateContent = result.descriptor.template?.content || '';
+    const style = result.descriptor.styles[0]?.content;
     const script = compileScript(result.descriptor, { refTransform: false, id: 'demo' });
     const scriptContent = script.content;
+    const configContent = result.descriptor.customBlocks[0]?.content || '';
+
+    const styleContent = compileStyle({ source: style, filename: fileName, id: fileName, preprocessLang: 'less' });
 
     return {
-        templateContent: templateContent || '',
-        styleContent,
+        templateContent,
+        styleContent: styleContent.code,
         scriptContent,
+        configContent,
     };
 }
 
@@ -209,15 +214,25 @@ export function writeJsToMiniProgram(src: string, content?: string) {
     console.count(`writeJsToMiniProgram-->${src}`);
 }
 
-export function writeVueToMiniProgram(src: string, scriptContent: string, templateContent: string, styleContent: string) {
+export function writeVueToMiniProgram(src: string, scriptContent: string, templateContent?: string, styleContent?: string, configContent?: string) {
     const { dirSrc, fileName } = usePathInfo(src);
     const targetDirSrc = path.join(targetDir, path.relative(sourceDir, dirSrc));
     const output = transformSync(scriptContent, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
 
     mkdirSync(targetDirSrc, { recursive: true });
     writeFileSync(`${targetDirSrc}/${fileName}.js`, output?.code || '', { encoding: 'utf-8' });
-    writeFileSync(`${targetDirSrc}/${fileName}.wxml`, templateContent, { encoding: 'utf-8' });
-    writeFileSync(`${targetDirSrc}/${fileName}.wxss`, styleContent, { encoding: 'utf-8' });
+
+    if (templateContent) {
+        writeFileSync(`${targetDirSrc}/${fileName}.wxml`, templateContent, { encoding: 'utf-8' });
+    }
+
+    if (styleContent) {
+        writeFileSync(`${targetDirSrc}/${fileName}.wxss`, styleContent, { encoding: 'utf-8' });
+    }
+
+    if (configContent) {
+        writeFileSync(`${targetDirSrc}/${fileName}.json`, configContent, { encoding: 'utf-8' });
+    }
 
     console.count(`writeVueToMiniProgram-->${src}`);
 }
@@ -258,8 +273,8 @@ function transformFiles(
         }
 
         if (extName == '.vue') {
-            const { templateContent, styleContent } = useVueSFC(src);
-            writeVueToMiniProgram(src, print(ast).code, templateContent, styleContent);
+            const { templateContent, styleContent, configContent } = useVueSFC(src);
+            writeVueToMiniProgram(src, print(ast).code, templateContent, styleContent, configContent);
         }
     });
 }
@@ -286,3 +301,5 @@ function useFileContentSync(src: string) {
     console.count(`useFileContentSync-->${src}`);
     return readFileSync(src, { encoding: 'utf-8' });
 }
+
+main('test-src', 'miniprogram');
