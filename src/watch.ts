@@ -3,7 +3,7 @@ import path from 'path/posix';
 import { sep } from 'path';
 import { watchVueFile, watchJsFile, main } from './main.js';
 import { copyFile } from 'fs/promises';
-import { usePathInfo } from './util.js';
+import { usePathInfo, usePathToPosix } from './util.js';
 import { env } from 'process';
 import watch from 'watch';
 
@@ -49,16 +49,17 @@ export function watchSourceAndBuild({ sourceDir, targetDir }: options) {
 
             if (typeof s == 'string') {
                 //   test-src\util\test3.js miniprogram test-src ../test-src\util\test3.js test-src\util\test3.js
+                const src = usePathToPosix(s);
+                console.log(src);
+
                 // @ts-ignore
-                watchFileChange(s, sourceDir, targetDir);
+                watchFileChange(src, sourceDir, targetDir);
             }
         }
     });
 }
 
-function watchFileChange(s: string, sourceDir: string, targetDir: string) {
-    const src = s.split(sep).join('/');
-
+function watchFileChange(src: string, sourceDir: string, targetDir: string) {
     const { fileName, dirSrc, extName } = usePathInfo(src);
     console.log(`${src} has been changed success :    extName: ${extName} `);
     if (extName == '.vue') {
