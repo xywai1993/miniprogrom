@@ -1,5 +1,7 @@
 import { createRequire } from 'module';
 import path from 'path/posix';
+import { sep } from 'path';
+import { platform } from 'os';
 
 /**
  * 利用require.resolve来判断一个地址是否为模块
@@ -17,6 +19,7 @@ export function isNpmModule(id: string) {
 }
 
 export function usePathInfo(src: string) {
+    src = usePathToPosix(src);
     const dirSrc = path.dirname(src);
     const extName = path.extname(src);
     const fileName = path.basename(src, extName);
@@ -26,6 +29,14 @@ export function usePathInfo(src: string) {
         fileName,
         extName,
     };
+}
+
+export function usePathToPosix(winPath: string) {
+    if (platform() === 'win32') {
+        return winPath.split(sep).join('/');
+    } else {
+        return winPath;
+    }
 }
 
 // 交集
