@@ -1,6 +1,7 @@
 import { createRequire } from 'module';
 import path from 'path/posix';
 import { sep } from 'path';
+import { platform } from 'os';
 
 /**
  * 利用require.resolve来判断一个地址是否为模块
@@ -31,7 +32,11 @@ export function usePathInfo(src: string) {
 }
 
 export function usePathToPosix(winPath: string) {
-    return winPath.split(sep).join('/');
+    if (platform() === 'win32') {
+        return winPath.split(sep).join('/');
+    } else {
+        return winPath;
+    }
 }
 
 // 交集
