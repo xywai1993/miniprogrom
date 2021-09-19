@@ -23,6 +23,7 @@
         "watch": "cross-env NODE_ENV=development node --loader ts-node/esm src/watch.ts",
         "tsc": "tsc",
         "test": "node --experimental-vm-modules node_modules/.bin/jest",
+        "win-test":"cross-env NODE_OPTIONS=--experimental-vm-modules npx jest",
         "watch-pro": "node watch-file.js"
     },
     "devDependencies": {

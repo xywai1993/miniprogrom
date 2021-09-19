@@ -39,39 +39,38 @@ export function watchSourceAndBuild({ sourceDir, targetDir }: options) {
         console.log({ curr, prev });
 
         if (typeof s == 'object' && prev === null && curr === null) {
-            // Finished walking the tree
             return;
         } else if (prev === null) {
             console.log('new file');
-            // f is a new file
         } else if (curr.nlink === 0) {
             console.log('remove');
-            // f was removed
         } else {
             console.log('change', typeof s);
 
             if (typeof s == 'string') {
                 //   test-src\util\test3.js miniprogram test-src ../test-src\util\test3.js test-src\util\test3.js
                 // @ts-ignore
-                const src = s.split(sep).join('/');
-
-                const { fileName, dirSrc, extName } = usePathInfo(src);
-                console.log(`${src} has been changed success :    extName: ${extName} `);
-                if (extName == '.vue') {
-                    watchVueFile(src);
-                } else if (extName == '.js') {
-                    watchJsFile(src);
-                } else {
-                    const targetSrc = path.join(targetDir, path.relative(sourceDir, src));
-                    copyFile(src, targetSrc).then(() => {
-                        console.log(`copyFile success : ${src}--->${targetSrc}`);
-                    });
-                }
+                watchFileChange(s, sourceDir, targetDir);
             }
-
-            // f was changed
         }
     });
+}
+
+function watchFileChange(s: string, sourceDir: string, targetDir: string) {
+    const src = s.split(sep).join('/');
+
+    const { fileName, dirSrc, extName } = usePathInfo(src);
+    console.log(`${src} has been changed success :    extName: ${extName} `);
+    if (extName == '.vue') {
+        watchVueFile(src);
+    } else if (extName == '.js') {
+        watchJsFile(src);
+    } else {
+        const targetSrc = path.join(targetDir, path.relative(sourceDir, src));
+        copyFile(src, targetSrc).then(() => {
+            console.log(`copyFile success : ${src}--->${targetSrc}`);
+        });
+    }
 }
 
 if (env.NODE_ENV === 'development') {

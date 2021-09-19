@@ -7,6 +7,7 @@ module.exports = {
     // transformIgnorePatterns: ['node_modules'],
     // All imported modules in your tests should be mocked automatically
     // automock: false,
+    transform: {},
 
     // Stop running tests after `n` failures
     // bail: 0,

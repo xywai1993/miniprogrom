@@ -1,5 +1,6 @@
 import { createRequire } from 'module';
 import path from 'path/posix';
+import { sep } from 'path';
 
 /**
  * 利用require.resolve来判断一个地址是否为模块
@@ -26,6 +27,10 @@ export function usePathInfo(src: string) {
         fileName,
         extName,
     };
+}
+
+export function usePathToPosix(winPath: string) {
+    return winPath.split(sep).join('/');
 }
 
 // 交集

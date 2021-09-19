@@ -1,22 +1,21 @@
 import { visit, parse as recastParse, print, types } from 'recast';
-import { parse as vueSFCParse, compileScript, compileStyle } from '@vue/compiler-sfc';
-import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'fs';
+import { parse as vueSFCParse, compileStyle } from '@vue/compiler-sfc';
+import { readFileSync, mkdirSync } from 'fs';
+import { writeFile, rm, mkdir } from 'fs/promises';
 import { isNpmModule, usePathInfo } from './util.js';
 import { build as rollupBuild } from './rollup.js';
-import { transformSync } from '@babel/core';
+import { transformAsync as babelTransform } from '@babel/core';
 import glob from 'glob';
 import path from 'path/posix';
 import { startTask } from '@yiper.fan/taskbuild';
+import { env } from 'process';
 console.time('program');
 let targetDir = '';
 let sourceDir = '';
-// TODO: 记得删除
-rmSync(targetDir, { force: true, recursive: true });
 const moduleCollection = new Map();
 const jsCollection = new Set();
 const fileCollection = new Map();
-// 初始转换入口
-
+// 入口函数
 export function main(source, target) {
     sourceDir = source;
     targetDir = target;
@@ -29,7 +28,6 @@ export function main(source, target) {
         transformFiles(fileCollection);
         rollupNpm(moduleCollection);
         console.timeEnd('program');
-
     });
     // 默认转移
     startTask({
@@ -78,44 +76,43 @@ function singeTransform(src) {
     }
     return isTransform;
 }
-function useVueSFC(src) {
-    const { fileName } = usePathInfo(src);
-    const file = useFileContentSync(src);
-    const result = vueSFCParse(file);
-    const templateContent = result.descriptor.template?.content || '';
-    const style = result.descriptor.styles[0]?.content;
-    const script = compileScript(result.descriptor, { refTransform: false, id: 'demo' });
-    const scriptContent = script.content;
-    const configContent = result.descriptor.customBlocks[0]?.content || '';
-    const styleContent = compileStyle({ source: style, filename: fileName, id: fileName, preprocessLang: 'less' });
-    return {
-        templateContent,
-        styleContent: styleContent.code,
-        scriptContent,
-        configContent,
-    };
-}
 // 收集依赖
 function collectMap(src) {
+    // 元素置空，从新收集
+    fileCollection.delete(src);
     const { dirSrc, extName, fileName } = usePathInfo(src);
     let file = '';
     const collection = [];
+    const collectionData = {
+        npm: new Set(),
+        src,
+        jsAst: '',
+        extName: '.js',
+    };
     if (extName === '.vue') {
-        const { scriptContent } = useVueSFC(src);
+        const { scriptContent, templateContent, configContent, style } = useVueSFC(src);
         file = scriptContent;
+        Object.assign(collectionData, {
+            extName: '.vue',
+            style: {
+                content: style.content,
+                lang: style.lang,
+            },
+            template: {
+                content: templateContent,
+                lang: undefined,
+            },
+            config: {
+                content: configContent,
+            },
+        });
     }
     else {
         file = useFileContentSync(src);
     }
     const recastAst = recastParse(file);
     // const b = types.builders;
-    // 元素置空，从新收集
-    fileCollection.delete(src);
-    const collectionData = {
-        npm: new Set(),
-        jsAst: recastAst,
-        src,
-    };
+    collectionData.jsAst = recastAst;
     visit(recastAst, {
         visitImportDeclaration(data) {
             const node = data.node;
@@ -164,35 +161,44 @@ function npmCollectionFunction(npmName, specifiers) {
  * @param {path} src 文件path
  * @param {string} [content] 文件内容，
  */
-export function writeJsToMiniProgram(src, content) {
+export async function writeJsToMiniProgram(src, content) {
     const file = content || useFileContentSync(src);
-    const output = transformSync(file, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
     const targetSrc = path.join(targetDir, path.relative(sourceDir, src));
     const targetDirSrc = path.dirname(targetSrc);
-    mkdirSync(targetDirSrc, { recursive: true });
-    writeFileSync(targetSrc, output?.code || '', { encoding: 'utf-8' });
+    const data = await Promise.all([useEs6toCommonjs(file), mkdir(targetDirSrc, { recursive: true })]);
+    writeFile(targetSrc, data[0]?.code || '', { encoding: 'utf-8' }).catch(() => {
+        console.log(`${targetSrc} -->写入失败`);
+    });
     console.count(`writeJsToMiniProgram-->${src}`);
 }
-export function writeVueToMiniProgram(src, scriptContent, templateContent, styleContent, configContent) {
+export async function writeVueToMiniProgram(src, scriptContent, templateContent, styleContent, configContent) {
+    console.count(`writeVueToMiniProgram-->${src}`);
     const { dirSrc, fileName } = usePathInfo(src);
     const targetDirSrc = path.join(targetDir, path.relative(sourceDir, dirSrc));
-    const output = transformSync(scriptContent, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
     mkdirSync(targetDirSrc, { recursive: true });
-    writeFileSync(`${targetDirSrc}/${fileName}.js`, output?.code || '', { encoding: 'utf-8' });
+    const data = await Promise.all([useEs6toCommonjs(scriptContent), mkdir(targetDirSrc, { recursive: true })]);
+    writeFile(`${targetDirSrc}/${fileName}.js`, data[0]?.code || '', { encoding: 'utf-8' }).catch(() => {
+        console.log(`${targetDirSrc}/${fileName}.js -->写入失败`);
+    });
     if (templateContent) {
-        writeFileSync(`${targetDirSrc}/${fileName}.wxml`, templateContent, { encoding: 'utf-8' });
+        writeFile(`${targetDirSrc}/${fileName}.wxml`, templateContent, { encoding: 'utf-8' }).catch(() => {
+            console.log(`${targetDirSrc}/${fileName}.wxml -->写入失败`);
+        });
     }
     if (styleContent) {
-        writeFileSync(`${targetDirSrc}/${fileName}.wxss`, styleContent, { encoding: 'utf-8' });
+        writeFile(`${targetDirSrc}/${fileName}.wxss`, styleContent, { encoding: 'utf-8' }).catch(() => {
+            console.log(`${targetDirSrc}/${fileName}.wxss -->写入失败`);
+        });
     }
     if (configContent) {
-        writeFileSync(`${targetDirSrc}/${fileName}.json`, configContent, { encoding: 'utf-8' });
+        writeFile(`${targetDirSrc}/${fileName}.json`, configContent, { encoding: 'utf-8' }).catch(() => {
+            console.log(`${targetDirSrc}/${fileName}.json -->写入失败`);
+        });
     }
-    console.count(`writeVueToMiniProgram-->${src}`);
 }
 function transformFiles(fileList) {
     fileList.forEach((data, src) => {
-        const { extName, dirSrc } = usePathInfo(src);
+        const { dirSrc, fileName } = usePathInfo(src);
         // const ast = recastParse(file);
         const ast = data.jsAst;
         visit(ast, {
@@ -208,12 +214,15 @@ function transformFiles(fileList) {
                 return false;
             },
         });
-        if (extName == '.js') {
+        if (data.extName == '.js') {
             writeJsToMiniProgram(src, print(ast).code);
         }
-        if (extName == '.vue') {
-            const { templateContent, styleContent, configContent } = useVueSFC(src);
-            writeVueToMiniProgram(src, print(ast).code, templateContent, styleContent, configContent);
+        if (data.extName == '.vue') {
+            let styleContent = data.style.content;
+            if (data.style.lang) {
+                styleContent = useCompileStyle({ styleContent: data.style.content, fileName, lang: data.style.lang }).code;
+            }
+            writeVueToMiniProgram(src, print(ast).code, data.template?.content, styleContent, data.config?.content);
         }
     });
 }
@@ -225,15 +234,53 @@ function rollupNpm(moduleList) {
         node.program.body[0].specifiers = specifiers;
         node.program.body[0].source = b.literal(key);
         const id = `./rollupTmp-${Math.ceil(Math.random() * 10000)}.js`;
-        writeFileSync(id, print(node).code);
-        rollupBuild(id, key).then((url) => {
-            rmSync(id);
+        writeFile(id, print(node).code).then(() => {
+            rollupBuild(id, key).then((url) => {
+                // rmSync(id);
+                rm(id).then(() => { });
+            });
         });
         console.count(`rollupNpm-->${key}`);
     });
 }
+function useVueSFC(src, option) {
+    const { fileName } = usePathInfo(src);
+    const file = useFileContentSync(src);
+    const result = vueSFCParse(file);
+    const template = result.descriptor.template;
+    const templateContent = template?.content || '';
+    const style = result.descriptor.styles[0];
+    let styleContent = style?.content;
+    // const script = compileScript(result.descriptor, { refTransform: false, id: fileName });
+    const scriptContent = result.descriptor.script?.content || '';
+    const configContent = result.descriptor.customBlocks[0]?.content || '';
+    if (option?.needCompileStyle && style.lang) {
+        styleContent = compileStyle({ source: styleContent, filename: fileName, id: fileName, preprocessLang: 'less' }).code;
+    }
+    return {
+        templateContent,
+        styleContent,
+        scriptContent,
+        configContent,
+        style,
+    };
+}
+function useCompileStyle({ styleContent, fileName, lang }) {
+    return compileStyle({ source: styleContent, filename: fileName, id: fileName, preprocessLang: lang });
+}
 function useFileContentSync(src) {
     console.count(`useFileContentSync-->${src}`);
-    return readFileSync(src, { encoding: 'utf-8' });
+    try {
+        return readFileSync(src, { encoding: 'utf-8' });
+    }
+    catch (error) {
+        console.log(`${src}读取失败`);
+        return '';
+    }
 }
-main('test-src', 'miniprogram');
+async function useEs6toCommonjs(content) {
+    return babelTransform(content, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
+}
+if (env.NODE_ENV === 'development') {
+    main('test-src', 'miniprogram');
+}

@@ -9,4 +9,5 @@ export declare function usePathInfo(src: string): {
     fileName: string;
     extName: string;
 };
+export declare function usePathToPosix(winPath: string): string;
 export declare function intersection<T>(setA: Set<T>, setB: Set<T>): Set<unknown>;
