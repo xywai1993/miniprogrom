@@ -1,9 +1,8 @@
 // import watch from 'node-watch';
 import path from 'path/posix';
-import { sep } from 'path';
 import { watchVueFile, watchJsFile } from './main.js';
 import { copyFile } from 'fs/promises';
-import { usePathInfo } from './util.js';
+import { usePathInfo, usePathToPosix } from './util.js';
 import { env } from 'process';
 import watch from 'watch';
 export function watchSourceAndBuild({ sourceDir, targetDir }) {
@@ -43,14 +42,15 @@ export function watchSourceAndBuild({ sourceDir, targetDir }) {
             console.log('change', typeof s);
             if (typeof s == 'string') {
                 //   test-src\util\test3.js miniprogram test-src ../test-src\util\test3.js test-src\util\test3.js
+                const src = usePathToPosix(s);
+                console.log(src);
                 // @ts-ignore
-                watchFileChange(s, sourceDir, targetDir);
+                watchFileChange(src, sourceDir, targetDir);
             }
         }
     });
 }
-function watchFileChange(s, sourceDir, targetDir) {
-    const src = s.split(sep).join('/');
+function watchFileChange(src, sourceDir, targetDir) {
     const { fileName, dirSrc, extName } = usePathInfo(src);
     console.log(`${src} has been changed success :    extName: ${extName} `);
     if (extName == '.vue') {
