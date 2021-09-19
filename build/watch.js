@@ -31,19 +31,22 @@ export function watchSourceAndBuild({ sourceDir, targetDir }) {
     watch.watchTree(sourceDir, { interval: 1 }, function (s, curr, prev) {
         console.log({ curr, prev });
         if (typeof s == 'object' && prev === null && curr === null) {
-            return;
-        }
-        else if (prev === null) {
-            console.log('new file');
+
+
+            // Finished walking the tree
+
+
         }
         else if (curr.nlink === 0) {
             console.log('remove');
+
         }
         else {
             console.log('change', typeof s);
             if (typeof s == 'string') {
                 //   test-src\util\test3.js miniprogram test-src ../test-src\util\test3.js test-src\util\test3.js
                 // @ts-ignore
+
                 watchFileChange(s, sourceDir, targetDir);
             }
         }
@@ -66,6 +69,7 @@ function watchFileChange(s, sourceDir, targetDir) {
         });
     }
 }
+
 if (env.NODE_ENV === 'development') {
     watchSourceAndBuild({ sourceDir: 'test-src', targetDir: 'miniprogram' });
 }
