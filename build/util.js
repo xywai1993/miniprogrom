@@ -17,6 +17,7 @@ export function isNpmModule(id) {
     }
 }
 export function usePathInfo(src) {
+    src = usePathToPosix(src);
     const dirSrc = path.dirname(src);
     const extName = path.extname(src);
     const fileName = path.basename(src, extName);
