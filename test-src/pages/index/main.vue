@@ -4,17 +4,15 @@
         <view class="green">{{ add }}</view>
         <button bindtap="changeNum" class="other-info">点我222</button>
 
-        <view wx:for="{{ arr }}" wx:key="index">{{ index }}</view>
+        <view wx:for="{{ arr }}" wx:key="index" class="item" bind:tap="showMe" data-index="{{index}}">{{ index }}</view>
     </view>
 </template>
 <script>
 const app = getApp();
 import { reactive, isProxy, computed, effect, readonly } from '@vue/reactivity';
-import { map } from 'underscore';
-import { test1 } from '../../util/test2.js';
+import * as test from '../../util/test2.js';
 
-test1();
-console.log(app);
+console.log(test.test1());
 const data = reactive({
     textNum: 0,
     arr: new Array(10).fill(1),
@@ -33,7 +31,10 @@ Page({
     },
 
     changeNum() {
-        data.textNum = data.textNum + 1;
+        data.textNum = data.textNum + 4;
+    },
+    showMe(event) {
+        console.log(event);
     },
 });
 </script>
@@ -53,5 +54,12 @@ Page({
     > .green {
         color: green;
     }
+}
+.item {
+    height: 60rpx;
+    border: 1px solid #000;
+    line-height: 60rpx;
+    width: 100%;
+    background-color: #f5f5f5;
 }
 </style>
