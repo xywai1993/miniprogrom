@@ -1,6 +1,6 @@
 // import watch from 'node-watch';
 import path from 'path/posix';
-import { watchVueFile, watchJsFile } from './main.js';
+import { watchVueFile, watchJsFile, main } from './main.js';
 import { copyFile } from 'fs/promises';
 import { usePathInfo, usePathToPosix } from './util.js';
 import { env } from 'process';
@@ -27,8 +27,9 @@ export function watchSourceAndBuild({ sourceDir, targetDir }) {
     //         });
     //     }
     // });
+    console.log('文件监听成功');
+    main(sourceDir, targetDir);
     watch.watchTree(sourceDir, { interval: 1 }, function (s, curr, prev) {
-        console.log({ curr, prev });
         if (typeof s == 'object' && prev === null && curr === null) {
             return;
         }
@@ -41,7 +42,6 @@ export function watchSourceAndBuild({ sourceDir, targetDir }) {
         else {
             console.log('change', typeof s);
             if (typeof s == 'string') {
-                //   test-src\util\test3.js miniprogram test-src ../test-src\util\test3.js test-src\util\test3.js
                 const src = usePathToPosix(s);
                 console.log(src);
                 // @ts-ignore
