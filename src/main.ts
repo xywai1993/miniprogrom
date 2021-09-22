@@ -318,7 +318,7 @@ function rollupNpm(moduleList: Map<string, Set<string>>) {
 
         const id = `./rollupTmp-${Math.ceil(Math.random() * 10000)}.js`;
         writeFile(id, print(node).code).then(() => {
-            rollupBuild(id, key).then((url) => {
+            rollupBuild(id, key, targetDir).then((url) => {
                 // rmSync(id);
                 rm(id).then(() => {});
             });
@@ -370,7 +370,7 @@ function useFileContentSync(src: string) {
     }
 }
 
-async function useEs6toCommonjs(content: string) {
+export async function useEs6toCommonjs(content: string) {
     return babelTransform(content, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
 }
 

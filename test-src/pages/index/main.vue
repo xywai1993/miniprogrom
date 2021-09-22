@@ -11,8 +11,10 @@
 const app = getApp();
 import { reactive, isProxy, computed, effect, readonly } from '@vue/reactivity';
 import * as test from '../../util/test2.js';
-
+import { test1 } from '../../util/test';
+test1();
 console.log(test.test1());
+console.log('main.vue');
 const data = reactive({
     textNum: 0,
     arr: new Array(10).fill(1),

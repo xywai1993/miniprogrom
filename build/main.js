@@ -235,7 +235,7 @@ function rollupNpm(moduleList) {
         node.program.body[0].source = b.literal(key);
         const id = `./rollupTmp-${Math.ceil(Math.random() * 10000)}.js`;
         writeFile(id, print(node).code).then(() => {
-            rollupBuild(id, key).then((url) => {
+            rollupBuild(id, key, targetDir).then((url) => {
                 // rmSync(id);
                 rm(id).then(() => { });
             });
@@ -278,7 +278,7 @@ function useFileContentSync(src) {
         return '';
     }
 }
-async function useEs6toCommonjs(content) {
+export async function useEs6toCommonjs(content) {
     return babelTransform(content, { plugins: ['@babel/plugin-transform-modules-commonjs'], code: true });
 }
 if (env.NODE_ENV === 'development') {
