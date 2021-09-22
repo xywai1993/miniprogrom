@@ -8,3 +8,4 @@ export declare function watchJsFile(src: string): void;
  */
 export declare function writeJsToMiniProgram(src: string, content?: string): Promise<void>;
 export declare function writeVueToMiniProgram(src: string, scriptContent: string, templateContent?: string, styleContent?: string, configContent?: string): Promise<void>;
+export declare function useEs6toCommonjs(content: string): Promise<import("@babel/core").BabelFileResult | null>;
