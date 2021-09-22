@@ -35,6 +35,7 @@ jobs:
                   node-version: 15.8.0
             - name: npm install and build
               run: |
+                  git rm -r build  
                   npm ci
                   npm run tsc
 
@@ -50,11 +51,14 @@ jobs:
             #       token: ${{ secrets.NPM_TOKEN }}
 
             - name: 提交到GitHub
-              run: |
-                  git config --global user.email 'yiper.fan@gmail.com'
-                  git config --global user.name "xywai1993"
-                  git add .
-                  git commit -am 'github action 自动发布新版本'
+            #   run: |
+            #       git config --global user.email 'yiper.fan@gmail.com'
+            #       git config --global user.name "xywai1993"
+            #       git add .
+            #       git commit -am 'github action 自动发布新版本'
+                run: |
+                    git add .
+                    git commit -am 'github action 自动发布新版本'
 
             - name: 发布到npm
               # if: ${{ always() }}

@@ -34,10 +34,9 @@ export function watchSourceAndBuild({ sourceDir, targetDir }: options) {
     //         });
     //     }
     // });
-
+    console.log('文件监听成功');
+    main(sourceDir, targetDir);
     watch.watchTree(sourceDir, { interval: 1 }, function (s, curr, prev) {
-        console.log({ curr, prev });
-
         if (typeof s == 'object' && prev === null && curr === null) {
             return;
         } else if (prev === null) {
@@ -48,10 +47,8 @@ export function watchSourceAndBuild({ sourceDir, targetDir }: options) {
             console.log('change', typeof s);
 
             if (typeof s == 'string') {
-                //   test-src\util\test3.js miniprogram test-src ../test-src\util\test3.js test-src\util\test3.js
                 const src = usePathToPosix(s);
                 console.log(src);
-
                 // @ts-ignore
                 watchFileChange(src, sourceDir, targetDir);
             }
