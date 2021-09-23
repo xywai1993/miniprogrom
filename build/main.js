@@ -117,11 +117,32 @@ function collectMap(src) {
         visitImportDeclaration(data) {
             const node = data.node;
             if (isNpmModule(String(node.source.value))) {
-                // @ts-ignore
-                const specifiers = node.specifiers.map((item) => item.imported.name);
                 const npmName = String(node.source.value);
+                // @ts-ignore
+                const specifiersData = {
+                    ImportNamespaceSpecifier: false,
+                    ImportDefaultSpecifier: false,
+                    ImportSpecifier: new Set(),
+                };
+                if (node.specifiers) {
+                    for (let index = 0; index < node.specifiers.length; index++) {
+                        const element = node.specifiers[index];
+                        console.log(element.type);
+                        if (element.type == 'ImportNamespaceSpecifier') {
+                            specifiersData.ImportNamespaceSpecifier = true;
+                            break;
+                        }
+                        if (element.type == 'ImportDefaultSpecifier') {
+                            specifiersData.ImportDefaultSpecifier = true;
+                            break;
+                        }
+                        if (element.type == 'ImportSpecifier') {
+                            specifiersData.ImportSpecifier.add(element.imported.name);
+                        }
+                    }
+                }
                 // 收集某个npm 导入了哪些方法
-                npmCollectionFunction(npmName, specifiers);
+                npmCollectionFunction(npmName, specifiersData);
                 // collectionData.relativeUrl = path.relative(dirSrc, path.join(sourceDir, 'rollup_modules'));
                 collectionData.npm.add(npmName);
             }
@@ -147,13 +168,20 @@ function collectMap(src) {
 // 收集npm使用了哪些方法
 function npmCollectionFunction(npmName, specifiers) {
     if (moduleCollection.get(npmName)) {
-        const newSet = moduleCollection.get(npmName);
-        specifiers.forEach((item) => newSet?.add(item));
+        const module = moduleCollection.get(npmName);
+        if (specifiers?.ImportDefaultSpecifier || specifiers?.ImportNamespaceSpecifier) {
+            module.ImportDefaultSpecifier = true;
+            module.ImportNamespaceSpecifier = true;
+            return;
+        }
+        const set = module.ImportSpecifier;
+        specifiers.ImportSpecifier.forEach((item) => set.add(item));
     }
     else {
-        const newSet = new Set();
-        specifiers.forEach((item) => newSet.add(item));
-        moduleCollection.set(npmName, newSet);
+        // const newSet: Set<string> = new Set();
+        // specifiers.ImportSpecifier.forEach((item) => newSet.add(item));
+        // specifiers.ImportSpecifier = newSet;
+        moduleCollection.set(npmName, specifiers);
     }
 }
 /**
@@ -227,12 +255,20 @@ function transformFiles(fileList) {
     });
 }
 function rollupNpm(moduleList) {
+    console.log(moduleList);
     moduleList.forEach((val, key) => {
         const b = types.builders;
-        const specifiers = [...val].map((item) => b.importSpecifier(b.identifier(item)));
-        const node = recastParse(`export {a} from 'b'`);
-        node.program.body[0].specifiers = specifiers;
-        node.program.body[0].source = b.literal(key);
+        let node = '';
+        if (val.ImportDefaultSpecifier || val.ImportNamespaceSpecifier) {
+            node = recastParse(`export *  from 'b'`);
+            node.program.body[0].source = b.literal(key);
+        }
+        else {
+            const specifiers = [...val.ImportSpecifier].map((item) => b.importSpecifier(b.identifier(item)));
+            node = recastParse(`export {a} from 'b'`);
+            node.program.body[0].specifiers = specifiers;
+            node.program.body[0].source = b.literal(key);
+        }
         const id = `./rollupTmp-${Math.ceil(Math.random() * 10000)}.js`;
         writeFile(id, print(node).code).then(() => {
             rollupBuild(id, key, targetDir).then((url) => {
@@ -243,7 +279,7 @@ function rollupNpm(moduleList) {
         console.count(`rollupNpm-->${key}`);
     });
 }
-function useVueSFC(src, option) {
+function useVueSFC(src) {
     const { fileName } = usePathInfo(src);
     const file = useFileContentSync(src);
     const result = vueSFCParse(file);
@@ -254,9 +290,6 @@ function useVueSFC(src, option) {
     // const script = compileScript(result.descriptor, { refTransform: false, id: fileName });
     const scriptContent = result.descriptor.script?.content || '';
     const configContent = result.descriptor.customBlocks[0]?.content || '';
-    if (option?.needCompileStyle && style.lang) {
-        styleContent = compileStyle({ source: styleContent, filename: fileName, id: fileName, preprocessLang: 'less' }).code;
-    }
     return {
         templateContent,
         styleContent,
