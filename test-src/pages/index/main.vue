@@ -9,25 +9,29 @@
 </template>
 <script>
 const app = getApp();
-import { reactive, isProxy, computed, effect, readonly } from '@vue/reactivity';
+import * as vue from '@vue/reactivity';
 import * as test from '../../util/test2.js';
 import { test1 } from '../../util/test';
+import { max } from 'underscore';
+
+console.log(max);
+
 test1();
 console.log(test.test1());
 console.log('main.vue');
-const data = reactive({
+const data = vue.reactive({
     textNum: 0,
     arr: new Array(10).fill(1),
-    add: computed(() => data.textNum + 10),
+    add: vue.computed(() => data.textNum + 10),
 });
 
-const d = isProxy(data);
+const d = vue.isProxy(data);
 console.log(d);
 Page({
     data: data,
     onLoad() {
         const that = this;
-        effect(() => {
+        vue.effect(() => {
             that.setData(data);
         });
     },
