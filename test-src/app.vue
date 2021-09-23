@@ -1,5 +1,7 @@
 <template></template>
 <script>
+import { readonly } from '@vue/reactivity';
+const a = readonly({ a: 1, b: 2 });
 //app.js
 App({
     onLaunch: function () {
@@ -21,12 +23,15 @@ App({
     },
 });
 </script>
-<style>
+<style lang="less">
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
     box-sizing: border-box;
+    > .xx {
+        text-align: center;
+    }
 }
 
 button {
