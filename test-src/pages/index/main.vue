@@ -10,14 +10,10 @@
 <script>
 const app = getApp();
 import * as vue from '@vue/reactivity';
-import * as test from '../../util/test2.js';
-import { test1 } from '../../util/test';
 import { max } from 'underscore';
 
 console.log(max);
 
-test1();
-console.log(test.test1());
 console.log('main.vue');
 const data = vue.reactive({
     textNum: 0,

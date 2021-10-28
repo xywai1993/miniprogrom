@@ -2,6 +2,7 @@
 <script>
 import { readonly } from '@vue/reactivity';
 const a = readonly({ a: 1, b: 2 });
+
 //app.js
 App({
     onLaunch: function () {
@@ -17,7 +18,7 @@ App({
                 traceUser: true,
             });
         }
-        console.log('app->0');
+        console.log('app->hahhahahah011111111');
 
         this.globalData = {};
     },
@@ -33,23 +34,7 @@ App({
         text-align: center;
     }
 }
-
-button {
-    background: initial;
-}
-
-button:focus {
-    outline: 0;
-}
-
-button::after {
-    border: none;
-}
-
-page {
-    background: #f6f6f6;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+.body {
+    background-color: #000;
 }
 </style>
