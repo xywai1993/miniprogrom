@@ -46,11 +46,13 @@ function assemble(sourcePath, descriptor) {
 }
 
 module.exports = function (content) {
+    console.log('执行几次呢');
     // console.log(this.resourcePath);
     const { _compiler, resource, resourcePath, request, resourceQuery, target, minimize, sourceMap, context, rootContext } = this;
     const { dirSrc, fileName } = usePathInfo(resourcePath);
     const stringifyRequest = (r) => loaderUtils.stringifyRequest(this, r);
     const rootPath = path.join(__dirname, 'test-src');
+    const basePathContext = context.replace(rootPath, '');
 
     // if (fileName !== 'App') {
     //     console.log(path.join(dirSrc, 'main.json'));
@@ -63,8 +65,6 @@ module.exports = function (content) {
     const descriptor = result.descriptor;
     const scriptContent = result.descriptor.script?.content;
     const styleContent = result.descriptor.styles[0].content;
-
-    const basePathContext = context.replace(rootPath, '');
 
     if (resourceQuery) {
         return styleContent;
@@ -97,5 +97,21 @@ module.exports = function (content) {
     //         return descriptor.styles[query.index].content;
     //     }
     // }
-    return assemble(resourcePath, result.descriptor);
+    // return assemble(resourcePath, result.descriptor);
+
+    // const templateImport = descriptor.template ? `import { render, staticRenderFns } from '${resourcePath}?template'` : ``;
+
+    const styleImports = descriptor.styles
+        .map((_, i) => {
+            return `import style${i} from 'wxss-loader!less-loader!${resourcePath}?vue&style&index=${i}'`;
+        })
+        .join('\n');
+
+    let code = `
+        ${styleImports}
+        ${descriptor.script.content}
+        `;
+
+    console.log({ code });
+    return code;
 };

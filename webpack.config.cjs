@@ -1,9 +1,10 @@
 const path = require('path');
 const qs = require('querystring');
+const { VueLoaderPlugin } = require('vue-loader');
 module.exports = {
-    entry: { app: './test-src/test.vue' },
-    mode: 'development',
-    // mode: 'production',
+    entry: { app: './test-src/test.vue', 'pages/index/main': './test-src/pages/index/main.vue' },
+    // mode: 'development',
+    mode: 'production',
     target: 'node',
     // output: { path: path.resolve(__dirname, './miniprogram') },
     optimization: {
@@ -15,6 +16,7 @@ module.exports = {
     resolveLoader: {
         alias: {
             'demo-loader': path.resolve(__dirname, './loader/demo-loader.cjs'),
+            'wxss-loader': path.resolve(__dirname, './loader/wxss-loader.cjs'),
         },
     },
     module: {
@@ -35,7 +37,6 @@ module.exports = {
                     {
                         loader: path.resolve(__dirname, './loader/demo-loader.cjs'),
                     },
-                    // 'vue-loader',
                 ],
             },
             {
