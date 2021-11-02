@@ -1,5 +1,5 @@
 <template>
-    <view> hello world 2223 </view>
+    <view class="demo"> hello world 2223 </view>
 </template>
 <script>
 Component({
@@ -22,6 +22,6 @@ Component({
 </script>
 <style>
 .demo {
-    color: #fff;
+    color: green;
 }
 </style>

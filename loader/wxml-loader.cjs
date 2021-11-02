@@ -17,7 +17,8 @@ module.exports = function (content) {
     const rootPath = path.join(rootContext, 'test-src');
     const basePathContext = context.replace(rootPath, '');
     console.log({ basePathContext });
-    const callback = this.async();
+    // const callback = this.async();
     this.emitFile(path.join(basePathContext, fileName + '.wxml'), content);
-    callback(null, `export default ''`);
+    // callback(null, `export default ''`);
+    return `export default ''`;
 };

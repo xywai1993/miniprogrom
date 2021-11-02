@@ -1,7 +1,7 @@
 import { envList } from '../envList.js';
 import { test3 } from './test3.js';
-
-export const a = '111';
+import { add } from './test2.js';
+export const a = add;
 export const b = '22';
 export const c = '22';
 export const d = '22';

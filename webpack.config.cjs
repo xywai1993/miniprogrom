@@ -38,6 +38,9 @@ module.exports = {
                 use: [
                     {
                         loader: path.resolve(__dirname, './loader/demo-loader.cjs'),
+                        options: {
+                            root: 'test-src',
+                        },
                     },
                 ],
             },

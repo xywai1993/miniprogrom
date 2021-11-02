@@ -2,7 +2,7 @@
     <view class="container">
         <view class="red">{{ textNum }}</view>
         <view class="green">{{ add }}</view>
-        <button bindtap="changeNum" class="other-info">点我222</button>
+        <button bind:tap="changeNum" class="other-info">点我222</button>
 
         <view wx:for="{{ arr }}" wx:key="index" class="item" bind:tap="showMe" data-index="{{index}}"> <demo-tag></demo-tag></view>
     </view>

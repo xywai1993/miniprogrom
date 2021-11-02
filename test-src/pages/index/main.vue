@@ -2,39 +2,49 @@
     <view class="container">
         <view class="red">{{ textNum }}</view>
         <view class="green">{{ add }}</view>
-        <button bindtap="changeNum" class="other-info">点我222</button>
+        <button bind:tap="changeNum" class="other-info">点我222</button>
 
         <view wx:for="{{ arr }}" wx:key="index" class="item" bind:tap="showMe" data-index="{{index}}"> <demo-tag></demo-tag></view>
     </view>
 </template>
 <script>
 const app = getApp();
-import * as vue from '@vue/reactivity';
+import { effect, reactive, computed, isProxy } from '@vue/reactivity';
 import { max } from 'underscore';
 import { a } from '../../util/test';
 
 console.log(max, a);
 
 console.log('main.vue');
-const data = vue.reactive({
+const data = reactive({
     textNum: a,
     arr: new Array(10).fill(1),
-    add: vue.computed(() => data.textNum + 10),
+    add: computed(() => Number(data.textNum) + 10),
 });
 
-const d = vue.isProxy(data);
+const d = isProxy(data);
 console.log(d);
 Page({
     data: data,
     onLoad() {
         const that = this;
-        vue.effect(() => {
+
+        // Object.keys(data).forEach((val) => {
+        //     effect(() => {
+        //         console.log('val', val, data[val]);
+        //         that.setData({ [val]: data[val] });
+        //     });
+        // });
+
+        effect(() => {
+            // console.log(1, data);
             that.setData(data);
         });
     },
 
     changeNum() {
-        data.textNum = data.textNum + 4;
+        // data.textNum = data.textNum + 4;
+        data.arr.push(10);
     },
     showMe(event) {
         console.log(event);
