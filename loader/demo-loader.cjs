@@ -3,6 +3,7 @@ const { dir } = require('console');
 const path = require('path/posix');
 const qs = require('querystring');
 const loaderUtils = require('loader-utils');
+const { URL } = require('url');
 
 // const result = vueSFCParse(file);
 // const template = result.descriptor.template;
@@ -59,15 +60,23 @@ module.exports = function (content) {
     //     this.addDependency(path.join(dirSrc, 'main.json'));
     // }
 
-    console.log({ resourceQuery, 'demo-loader': 1, content });
+    console.log({ resourceQuery, 'demo-loader': 1 });
 
     const result = vueSFCParse(content);
     const descriptor = result.descriptor;
     const scriptContent = result.descriptor.script?.content;
     const styleContent = result.descriptor.styles[0].content;
+    const templateContent = descriptor.template.content;
 
-    if (resourceQuery) {
+    const url = new URL(resourceQuery, 'http://test.com');
+
+    console.log(url.searchParams.has('vue'), url.searchParams.has('style'));
+    if (url.searchParams.has('vue') && url.searchParams.has('style')) {
         return styleContent;
+    }
+
+    if (url.searchParams.has('vue') && url.searchParams.has('template')) {
+        return templateContent;
     }
     // console.log({ context, rootContext, resourcePath, resource, basePathContext });
     // console.log(scriptContent);
@@ -99,7 +108,7 @@ module.exports = function (content) {
     // }
     // return assemble(resourcePath, result.descriptor);
 
-    // const templateImport = descriptor.template ? `import { render, staticRenderFns } from '${resourcePath}?template'` : ``;
+    const templateImport = descriptor.template ? `import template from 'wxml-loader!${resourcePath}?vue&template'` : ``;
 
     const styleImports = descriptor.styles
         .map((_, i) => {
@@ -108,6 +117,7 @@ module.exports = function (content) {
         .join('\n');
 
     let code = `
+        ${templateImport}
         ${styleImports}
         ${descriptor.script.content}
         `;

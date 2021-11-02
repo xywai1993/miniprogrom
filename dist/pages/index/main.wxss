@@ -1,3 +1,9 @@
+.a {
+  color: red;
+}
+.a .b {
+  color: green;
+}
 .container {
   background: #fff;
 }
@@ -13,4 +19,7 @@
   line-height: 60rpx;
   width: 100%;
   background-color: #f5f5f5;
+}
+.demo {
+  color: #000;
 }

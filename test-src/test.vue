@@ -5,5 +5,6 @@ body {
 }
 </style>
 <script>
-console.log('11122233443322');
+import { a } from './util/test';
+console.log('11122233443322', a);
 </script>

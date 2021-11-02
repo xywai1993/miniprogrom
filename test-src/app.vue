@@ -1,8 +1,9 @@
 <template></template>
 <script>
 import { readonly } from '@vue/reactivity';
+import { a as b } from './util/test';
 const a = readonly({ a: 1, b: 2 });
-
+console.log(b);
 //app.js
 App({
     onLaunch: function () {
@@ -18,7 +19,7 @@ App({
                 traceUser: true,
             });
         }
-        console.log('app->hahhahahah011111111');
+        console.log('app->011111111');
 
         this.globalData = {};
     },

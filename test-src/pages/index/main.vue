@@ -4,19 +4,20 @@
         <view class="green">{{ add }}</view>
         <button bindtap="changeNum" class="other-info">点我222</button>
 
-        <view wx:for="{{ arr }}" wx:key="index" class="item" bind:tap="showMe" data-index="{{index}}">{{ index }}</view>
+        <view wx:for="{{ arr }}" wx:key="index" class="item" bind:tap="showMe" data-index="{{index}}"> <demo-tag></demo-tag></view>
     </view>
 </template>
 <script>
 const app = getApp();
 import * as vue from '@vue/reactivity';
 import { max } from 'underscore';
+import { a } from '../../util/test';
 
-console.log(max);
+console.log(max, a);
 
 console.log('main.vue');
 const data = vue.reactive({
-    textNum: 0,
+    textNum: a,
     arr: new Array(10).fill(1),
     add: vue.computed(() => data.textNum + 10),
 });
@@ -48,6 +49,7 @@ Page({
 </config>
 
 <style lang="less">
+@import url('../../style/common.less');
 .container {
     background: #fff;
     > .red {
@@ -63,5 +65,8 @@ Page({
     line-height: 60rpx;
     width: 100%;
     background-color: #f5f5f5;
+}
+.demo {
+    color: #000;
 }
 </style>
