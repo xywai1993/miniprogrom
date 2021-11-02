@@ -47,8 +47,6 @@ function assemble(sourcePath, descriptor) {
 }
 
 module.exports = function (content) {
-    console.log('执行几次呢');
-    // console.log(this.resourcePath);
     const { _compiler, resource, resourcePath, request, resourceQuery, target, minimize, sourceMap, context, rootContext, query } = this;
     const { dirSrc, fileName } = usePathInfo(resourcePath);
     const stringifyRequest = (r) => loaderUtils.stringifyRequest(this, r);
@@ -65,7 +63,6 @@ module.exports = function (content) {
 
     const url = new URL(resourceQuery, 'http://test.com');
 
-    console.log(url.searchParams.has('vue'), url.searchParams.has('style'));
     if (url.searchParams.has('vue') && url.searchParams.has('style')) {
         return styleContent;
     }

@@ -1,5 +1,8 @@
 <template>
-    <view class="demo"> hello world 2223 </view>
+    <div class="demo">
+        <div class="h1">hello world 2223</div>
+        <p class="span" bind:tap="{{customMethod}}">22</p>
+    </div>
 </template>
 <script>
 Component({
@@ -16,12 +19,21 @@ Component({
     },
     methods: {
         // 这里是一个自定义方法
-        customMethod: function () {},
+        customMethod: function () {
+            console.log(112233);
+        },
     },
 });
 </script>
-<style>
+<style lang="less">
 .demo {
     color: green;
+}
+.span {
+    color: red;
+}
+.h1 {
+    font-size: 30px;
+    text-align: center;
 }
 </style>

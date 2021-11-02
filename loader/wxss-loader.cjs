@@ -14,13 +14,13 @@ function usePathInfo(src) {
 module.exports = function (content) {
     const { _compiler, resource, resourcePath, request, resourceQuery, target, minimize, sourceMap, context, rootContext, query } = this;
     const url = new URL(query, 'http://demo.com');
-
+    this.callback(null, `export default ''`);
     const { dirSrc, fileName } = usePathInfo(resourcePath);
     const rootPath = path.join(rootContext, url.searchParams.get('root'));
     const basePathContext = context.replace(rootPath, '');
-    console.log({ wxss: true, basePathContext });
+    console.log({ wxss: true, basePathContext, query });
     this.emitFile(path.join(basePathContext, fileName + '.wxss'), content);
-    return `export default ''`;
+    // return `export default ''`;
     // const callback = this.async();
     // callback(null, `export default ''`);
 };

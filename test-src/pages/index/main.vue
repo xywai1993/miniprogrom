@@ -3,7 +3,6 @@
         <view class="red">{{ textNum }}</view>
         <view class="green">{{ add }}</view>
         <button bind:tap="changeNum" class="other-info">点我222</button>
-
         <view wx:for="{{ arr }}" wx:key="index" class="item" bind:tap="showMe" data-index="{{index}}"> <demo-tag></demo-tag></view>
     </view>
 </template>
@@ -47,7 +46,7 @@ Page({
         data.arr.push(10);
     },
     showMe(event) {
-        console.log(event);
+        console.log(2345);
     },
 });
 </script>
@@ -70,9 +69,7 @@ Page({
     }
 }
 .item {
-    height: 60rpx;
     border: 1px solid #000;
-    line-height: 60rpx;
     width: 100%;
     background-color: #f5f5f5;
 }
