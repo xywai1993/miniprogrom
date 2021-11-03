@@ -4,7 +4,7 @@
         "backgroundColor": "#fff",
         "backgroundTextStyle": "light",
         "navigationBarBackgroundColor": "#F6F6F6",
-        "navigationBarTitleText": "月圆中秋",
+        "navigationBarTitleText": "宝妈清单",
         "navigationBarTextStyle": "black"
     },
     "sitemapLocation": "sitemap.json",

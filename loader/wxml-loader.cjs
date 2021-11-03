@@ -1,5 +1,41 @@
 const path = require('path');
 const { html2json, json2html } = require('html2json');
+const compiler = require('vue-template-compiler');
+
+const result = compiler.compile('<div @click="hello" > <p>22</p> </div>', {
+    directives: {
+        test(node, directiveMeta) {
+            // transform node based on directiveMeta
+            // console.log({ node, directiveMeta });
+            node.tag = 'h1';
+            return node;
+        },
+    },
+});
+
+/**
+ * 
+ * @param ast 
+ * {
+    type: 1,
+    tag: 'div',
+    attrsList: [ [Object] ],
+    attrsMap: { '@click': 'hello' },
+    rawAttrsMap: {},
+    parent: undefined,
+    children: [ [Object] ],
+    plain: false,
+    hasBindings: true,
+    events: { click: [Object] },
+    static: false,
+    staticRoot: false
+  }
+ */
+function astToTemplate(ast) {
+    if (ast.type === 1) {
+        ``;
+    }
+}
 
 function usePathInfo(src) {
     const dirSrc = path.dirname(src);
@@ -14,10 +50,14 @@ function usePathInfo(src) {
 }
 
 function transformTmp(nodeChild) {
-    const list = ['div', 'h1', 'p'];
+    const list = ['div', 'h1', 'p', 'ul', 'li'];
 
     return nodeChild.map((item) => {
         if (item.node == 'element') {
+            if (item.attr) {
+                item.attr = changeAttr(item.attr);
+            }
+
             if (list.indexOf(item.tag) !== -1) {
                 item.tag = 'view';
             }
@@ -29,8 +69,20 @@ function transformTmp(nodeChild) {
     });
 }
 
+function changeAttr(object) {
+    if (object.hasOwnProperty('v-if')) {
+        object['wx:if'] = `{{${object['v-if']}}}`;
+    }
+
+    if (object.hasOwnProperty('v-on:click')) {
+        object['bind:tap'] = `${object['v-on:click']}`;
+    }
+    return object;
+}
+
 module.exports = function (content) {
     const { _compiler, resource, resourcePath, request, resourceQuery, target, minimize, sourceMap, context, rootContext } = this;
+    this.callback(null, `export default ''`);
     const { dirSrc, fileName } = usePathInfo(resourcePath);
     const rootPath = path.join(rootContext, 'test-src');
     const basePathContext = context.replace(rootPath, '');
@@ -39,9 +91,7 @@ module.exports = function (content) {
 
     templateJson.child = transformTmp(templateJson.child);
 
-    console.log(templateJson);
     // const callback = this.async();
     this.emitFile(path.join(basePathContext, fileName + '.wxml'), json2html(templateJson));
     // return `export default ''`;
-    this.callback(null, `export default ''`);
 };

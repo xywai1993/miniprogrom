@@ -1,5 +1,4 @@
 const { parse: vueSFCParse, compileScript } = require('@vue/compiler-sfc');
-const { dir } = require('console');
 const path = require('path/posix');
 const qs = require('querystring');
 const loaderUtils = require('loader-utils');
@@ -50,12 +49,11 @@ module.exports = function (content) {
     const { _compiler, resource, resourcePath, request, resourceQuery, target, minimize, sourceMap, context, rootContext, query } = this;
     const { dirSrc, fileName } = usePathInfo(resourcePath);
     const stringifyRequest = (r) => loaderUtils.stringifyRequest(this, r);
-    const rootPath = path.join(__dirname, 'test-src');
+    const rootPath = path.join(rootContext, query.root);
     const basePathContext = context.replace(rootPath, '');
 
-    console.log({ resourceQuery, query, 'demo-loader': 1 });
-
     const result = vueSFCParse(content);
+
     const descriptor = result.descriptor;
     const scriptContent = result.descriptor.script?.content;
     const styleContent = result.descriptor.styles[0].content;
@@ -69,6 +67,14 @@ module.exports = function (content) {
 
     if (url.searchParams.has('vue') && url.searchParams.has('template')) {
         return templateContent;
+    }
+
+    if (result.descriptor.customBlocks.length) {
+        result.descriptor.customBlocks.forEach((item) => {
+            if (item.type === 'config') {
+                this.emitFile(path.join(basePathContext, fileName + '.json'), item.content);
+            }
+        });
     }
 
     const templateImport = descriptor.template ? `import template from 'wxml-loader!${resourcePath}?vue&template'` : ``;
@@ -85,6 +91,5 @@ module.exports = function (content) {
         ${descriptor.script.content}
         `;
 
-    // console.log({ code });
     return code;
 };

@@ -1,0 +1,1 @@
+(()=>{"use strict";Component({properties:{hover:{type:String,value:"a"}},data:{someData:{}},methods:{customMethod:function(){console.log(112233)}}})})();

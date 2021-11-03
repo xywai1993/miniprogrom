@@ -1,14 +1,14 @@
 name: npm publish
 
 on:
-    push:
-        branches:
-            - master
+    # push:
+    #     branches:
+    #         - master
     # pull_request:
     #     branches:
     #         - master
-    # tags:
-    #     - 'npm*'
+    tags:
+        - 'npm*'
 
 jobs:
     # test:

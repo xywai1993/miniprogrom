@@ -2,8 +2,32 @@ const path = require('path');
 const qs = require('querystring');
 const { VueLoaderPlugin } = require('vue-loader');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const glob = require('glob');
+
+function resolve(dir) {
+    return path.join(__dirname, dir);
+}
+
+function getEntry(rootSrc, paths) {
+    var map = {};
+    glob.sync(rootSrc + paths).forEach((file) => {
+        var key = path.relative(rootSrc, file).replace('.vue', '');
+        map[key] = file;
+    });
+    return map;
+}
+
+const appEntry = { app: resolve('./test-src/app.vue') };
+const pagesEntry = getEntry(resolve('./test-src'), '/pages/**/main.vue');
+const component = getEntry(resolve('./test-src'), '/components/**/main.vue');
+// const pagesEntryB = getEntry(resolve('./src'), '/packageb/pages/**/main.js');
+// const pagesEntryC = getEntry(resolve('./src'), '/packagec/pages/**/main.js');
+const entry = Object.assign({}, appEntry, pagesEntry, component);
+
+console.log(entry);
+
 module.exports = {
-    entry: { app: './test-src/app.vue', 'pages/index/main': './test-src/pages/index/main.vue', 'components/demo/main': './test-src/components/demo/main.vue' },
+    entry,
     // mode: 'development',
     mode: 'production',
     target: 'node',
@@ -23,16 +47,41 @@ module.exports = {
     },
     module: {
         rules: [
+            // {
+            //     loader: require.resolve('./loader/pitch-loader.cjs'),
+            //     resourceQuery: (query) => {
+            //         if (!query) {
+            //             return false;
+            //         }
+            //         const parsed = qs.parse(query.slice(1));
+            //         return parsed.vue != null;
+            //     },
+            // },
             {
-                loader: require.resolve('./loader/pitch-loader.cjs'),
-                resourceQuery: (query) => {
-                    if (!query) {
-                        return false;
-                    }
-                    const parsed = qs.parse(query.slice(1));
-                    return parsed.vue != null;
+                resourceQuery: /asset-resource/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'img/[hash][ext][query]',
                 },
             },
+            {
+                test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+                type: 'asset/resource',
+                // type: 'asset',
+                // options: {
+                //     limit: 6,
+                //     name: utils.assetsPath('img/[name].[hash:5].[ext]'),
+                // },
+                generator: {
+                    filename: 'img/[hash][ext][query]',
+                },
+                // parser: {
+                //     dataUrlCondition: {
+                //         maxSize: 4 * 1024, // 4kb
+                //     },
+                // },
+            },
+
             {
                 test: /\.vue$/,
                 use: [
@@ -44,6 +93,16 @@ module.exports = {
                     },
                 ],
             },
+
+            // {
+            //     test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+            //     loader: 'url-loader',
+            //     options: {
+            //         limit: 6,
+            //         name: 'img/[name].[hash:5].[ext]',
+            //     },
+            // },
+
             {
                 test: /.css$/i,
                 use: ['css-loader'],

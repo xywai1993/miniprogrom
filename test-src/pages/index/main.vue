@@ -1,11 +1,45 @@
 <template>
-    <view class="container">
-        <view class="red">{{ textNum }}</view>
-        <view class="green">{{ add }}</view>
-        <button bind:tap="changeNum" class="other-info">点我222</button>
-        <view wx:for="{{ arr }}" wx:key="index" class="item" bind:tap="showMe" data-index="{{index}}"> <demo-tag></demo-tag></view>
-    </view>
+    <div class="body">
+        <!-- <mp-navigation-bar :ext-class="'nav-bar'" :background="bgColor" :title="title" :back="false" color="#FFF">
+            <view slot="left" v-show="!title">
+                <input type="text" class="top-search" placeholder="2021年待产包清单" @confirm="confirm" @blur="searchBlur" />
+            </view>
+        </mp-navigation-bar> -->
+        <button v-on:click="showMe">点我</button>
+        <div class="g-flex-center header">
+            <input type="text" v-show="title" class="search" placeholder="2021年待产包清单" />
+        </div>
+
+        <div class="grid" v-if="show">
+            <div>
+                <ul class="list-wrap">
+                    <li v-for="li in arr" class="item">
+                        <demo-tag></demo-tag>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <ul class="list-wrap">
+                    <li v-for="li in list2" class="item">
+                        <list-tag :tag-data="li"></list-tag>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <nav-nav hover="a"></nav-nav>
+    </div>
 </template>
+
+<config lang="json">
+{
+    "backgroundColor": "#fff",
+    "usingComponents": {
+        "demo-tag": "/components/demo/main",
+        "nav-nav": "/components/nav/main"
+    }
+}
+</config>
 <script>
 const app = getApp();
 import { effect, reactive, computed, isProxy } from '@vue/reactivity';
@@ -19,6 +53,7 @@ const data = reactive({
     textNum: a,
     arr: new Array(10).fill(1),
     add: computed(() => Number(data.textNum) + 10),
+    show: false,
 });
 
 const d = isProxy(data);
@@ -47,33 +82,67 @@ Page({
     },
     showMe(event) {
         console.log(2345);
+        data.show = !data.show;
     },
 });
 </script>
 
-<config lang="json">
-{
-    "backgroundColor": "#f9f9f9"
-}
-</config>
-
 <style lang="less">
-@import url('../../style/common.less');
-.container {
-    background: #fff;
-    > .red {
-        color: red;
-    }
-    > .green {
-        color: green;
-    }
+.body {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    background-color: #f2f2f2;
+    min-height: 100vh;
 }
-.item {
-    border: 1px solid #000;
+.header {
+    // margin-top: calc(-44px - env(safe-area-inset-top));
     width: 100%;
-    background-color: #f5f5f5;
+    height: 252px;
+    // background: url('./static/souyebg@2x.png') center no-repeat;
+    background-size: contain;
+    opacity: 1;
 }
-.demo {
-    color: #000;
+.search {
+    margin-top: 10px;
+    padding-left: 35px;
+    width: 312px;
+    height: 40px;
+    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.13);
+    opacity: 1;
+    border-radius: 27px;
+    // background: #fff url('./static/search-icon@2x.png') 10px center/18px auto no-repeat;
+}
+.top-search {
+    width: 210px;
+    padding-left: 30px;
+    height: 32px;
+    border: 1px solid rgba(247, 243, 245, 1);
+    border-radius: 17px;
+    color: #333;
+    // background: #fff url('./static/search-icon@2x.png') 10px center/18px auto no-repeat;
+}
+
+.grid {
+    margin: -65px auto 0;
+    width: 96%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    box-sizing: border-box;
+    gap: 10px;
+}
+.list-wrap {
+    // margin-top: -40px;
+    // padding: 0 10px;
+    // column-count: 2;
+
+    > .item {
+        // break-inside: avoid;
+        // padding: 0 10px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+        box-shadow: 0px 3px 30px rgba(0, 0, 0, 0.06);
+        opacity: 1;
+        border-radius: 6px;
+    }
 }
 </style>
