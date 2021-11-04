@@ -25,12 +25,19 @@ const component = getEntry(resolve('./test-src'), '/components/**/main.vue');
 // const pagesEntryC = getEntry(resolve('./src'), '/packagec/pages/**/main.js');
 const entry = Object.assign({}, appEntry, pagesEntry, component);
 
+console.log({ entry });
 module.exports = {
     entry,
     // mode: 'development',
     mode: 'production',
     target: 'node',
     // output: { path: path.resolve(__dirname, './miniprogram') },
+    output: {
+        publicPath: 'http://localhost:3333/dist/',
+    },
+    resolve: {
+        extensions: ['.js'],
+    },
     optimization: {
         splitChunks: {
             // include all types of chunks

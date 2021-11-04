@@ -1,7 +1,6 @@
 {
     "name": "@yiper.fan/mini-program-builder",
     "version": "0.1.6",
-    "type": "module",
     "main": "build/watch.js",
     "author": "yiper.fan",
     "dependencies": {
@@ -34,7 +33,7 @@
         "watch": "cross-env NODE_ENV=development node --loader ts-node/esm src/watch.ts",
         "tsc": "tsc",
         "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest",
-        "webpack": "webpack "
+        "webpack": "webpack -w "
     },
     "devDependencies": {
         "@babel/plugin-syntax-import-meta": "^7.10.4",

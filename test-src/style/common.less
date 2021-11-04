@@ -1,6 +1,42 @@
-.a {
-    color: red;
-    .b {
-        color: green;
-    }
+@cdn: 'https://image.douba.cn/kaimaizhushou/';
+
+.color-size(@color:#333,@size:14px) {
+    font-size: @size;
+    color: @color;
+}
+
+// 比实际图缩小4倍
+.all-icon(@left,@top,@size:4) {
+    background-image: url('@{cdn}all-icon5.png');
+    background-repeat: no-repeat;
+    background-size: 900px / @size auto;
+    background-position: @left / @size @top / @size;
+}
+
+.g-btn(@width,@height,@bgcolor) {
+    text-align: center;
+    line-height: @height;
+    height: @height;
+    width: @width;
+    background-color: @bgcolor;
+    color: #ffffff;
+    border-radius: 5px;
+}
+.g-bg-size(@val:100% auto) {
+    background-size: @val;
+}
+
+.g-bg-start(@val:100% auto) {
+    background-position: left top;
+    background-repeat: no-repeat;
+    .g-bg-size(@val);
+}
+.g-bg-center(@val:100% auto) {
+    background-position: center;
+    background-repeat: no-repeat;
+    .g-bg-size(@val);
+}
+
+.g-img {
+    width: 100%;
 }

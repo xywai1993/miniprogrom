@@ -27,19 +27,19 @@
   color: #333;
 }
 .grid {
-  margin: -65px auto 0;
+  margin: -65rpx auto 0;
   width: 96%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr;
   box-sizing: border-box;
-  gap: 10px;
+  gap: 10rpx;
 }
 .list-wrap > .item {
   margin-bottom: 10px;
   box-sizing: border-box;
   box-shadow: 0px 3px 30px rgba(0, 0, 0, 0.06);
   opacity: 1;
-  border-radius: 6px;
+  border-radius: 6rpx;
 }
 

@@ -1,0 +1,15 @@
+
+    <view class="item">
+        <view class="item-img">
+            <!-- <img :src="tagData.thumb" mode="widthFix" class="g-img" /> -->
+            <image mode="widthFix" src="{{tagData.thumb}}" class="g-img"></image>
+        </view>
+        <h3 class="item-title mt-10">{{ tagData.title }}</h3>
+        <view class="flex item-info mt-10">
+            <!-- <img :src="tagData.author.avatar" class="item-avatar" /> -->
+            <image mode="widthFix" src="{{tagData.author.avatar}}" class="item-avatar"></image>
+            <view class="flex-1 item-author">{{ tagData.author.nickname }}</view>
+            <view class="item-collect">{{ tagData.like_count }}</view>
+        </view>
+        <!-- <div class="tag" :class="tag"></div> -->
+    </view>

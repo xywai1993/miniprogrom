@@ -36,28 +36,28 @@
   text-align: center;
 }
 .icon-a {
-  background-image: url(img/a-icon.49ec7.png);
+  background-image: url(http://localhost:3333/dist/img/a-icon.49ec7.png);
 }
 .icon-b {
-  background-image: url(img/b-icon.6b89b.png);
+  background-image: url(http://localhost:3333/dist/img/b-icon.6b89b.png);
 }
 .icon-c {
-  background-image: url(img/c-icon.67ee3.png);
+  background-image: url(http://localhost:3333/dist/img/c-icon.67ee3.png);
 }
 .icon-d {
-  background-image: url(img/d-icon.67ee3.png);
+  background-image: url(http://localhost:3333/dist/img/d-icon.67ee3.png);
 }
 .on .icon-a {
-  background-image: url(img/a-on-icon.41ef0.png);
+  background-image: url(http://localhost:3333/dist/img/a-on-icon.41ef0.png);
 }
 .on .icon-b {
-  background-image: url(img/b-on-icon.8ffa3.png);
+  background-image: url(http://localhost:3333/dist/img/b-on-icon.8ffa3.png);
 }
 .on .icon-c {
-  background-image: url(img/c-icon.67ee3.png);
+  background-image: url(http://localhost:3333/dist/img/c-icon.67ee3.png);
 }
 .on .icon-d {
-  background-image: url(img/d-on-icon.7f0f9.png);
+  background-image: url(http://localhost:3333/dist/img/d-on-icon.7f0f9.png);
 }
 .on .item-title {
   color: #fc8686;

@@ -10,21 +10,22 @@
             <input type="text" v-show="title" class="search" placeholder="2021年待产包清单" />
         </div>
 
-        <div class="grid" v-if="show">
-            <div>
+        <div class="grid">
+            <view>
                 <ul class="list-wrap">
-                    <li v-for="li in arr" class="item">
-                        <demo-tag></demo-tag>
+                    <li wx:for="{{list1}}" wx:key="material_id" class="item">
+                        <list-tag tagData="{{item}}"></list-tag>
                     </li>
                 </ul>
-            </div>
-            <div>
+            </view>
+
+            <view>
                 <ul class="list-wrap">
-                    <li v-for="li in list2" class="item">
-                        <list-tag :tag-data="li"></list-tag>
+                    <li wx:for="{{list2}}" wx:key="material_id" class="item">
+                        <list-tag tagData="{{item}}"></list-tag>
                     </li>
                 </ul>
-            </div>
+            </view>
         </div>
 
         <nav-nav hover="a"></nav-nav>
@@ -36,7 +37,8 @@
     "backgroundColor": "#fff",
     "usingComponents": {
         "demo-tag": "/components/demo/main",
-        "nav-nav": "/components/nav/main"
+        "nav-nav": "/components/nav/main",
+        "list-tag": "/components/list-tag/main"
     }
 }
 </config>
@@ -45,15 +47,19 @@ const app = getApp();
 import { effect, reactive, computed, isProxy } from '@vue/reactivity';
 import { max } from 'underscore';
 import { a } from '../../util/test';
+import { GetMaterials } from '../../server/index.js';
 
 console.log(max, a);
 
 console.log('main.vue');
 const data = reactive({
-    textNum: a,
-    arr: new Array(10).fill(1),
-    add: computed(() => Number(data.textNum) + 10),
-    show: false,
+    list1: [],
+    list2: [],
+    page_size: 1,
+    total_page: 1,
+    list: [],
+    title: '宝妈清单',
+    bgColor: '#00000000',
 });
 
 const d = isProxy(data);
@@ -74,6 +80,14 @@ Page({
             // console.log(1, data);
             that.setData(data);
         });
+
+        GetMaterials().then((data) => {
+            // console.log(11, this.createList(data.list));
+
+            this.createGrid(data.list);
+            // this.total_page = Math.ceil(data.total / 20);
+            // this.list = data.list;
+        });
     },
 
     changeNum() {
@@ -83,6 +97,63 @@ Page({
     showMe(event) {
         console.log(2345);
         data.show = !data.show;
+    },
+    goType(type, id) {
+        console.log(type);
+        let url = '';
+        switch (type) {
+            case 1:
+                url = 'pic-details';
+                break;
+            case 2:
+                url = 'todo-list';
+                break;
+            case 3:
+                url = 'video-list';
+                break;
+            case 4:
+                url = 'audio-list';
+                break;
+            case 5:
+                url = 'question-list';
+                break;
+            default:
+                break;
+        }
+        goTo(url, { id });
+    },
+    confirm(e) {
+        console.log(e.target.value);
+        GetMaterials('', e.target.value).then((data) => {
+            console.log(data);
+
+            this.createGrid(data.list);
+        });
+    },
+    searchBlur(e) {
+        console.log(e);
+        if (!e.target.value) {
+            GetMaterials().then((data) => {
+                console.log(data);
+                this.createGrid(data.list);
+            });
+        }
+    },
+    createGrid(list) {
+        // const _list = list.reduce((pre, current) => {
+        //     return pre.concat(current);
+        // }, []);
+        const list1 = [];
+        const list2 = [];
+        list.forEach((item, index) => {
+            if (index % 2 === 0) {
+                list1.push(item);
+            } else {
+                list2.push(item);
+            }
+        });
+        data.list1 = list1;
+        data.list2 = list2;
     },
 });
 </script>
@@ -122,19 +193,18 @@ Page({
 }
 
 .grid {
-    margin: -65px auto 0;
+    margin: -65rpx auto 0;
     width: 96%;
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr;
     box-sizing: border-box;
-    gap: 10px;
+    gap: 10rpx;
 }
 .list-wrap {
     // margin-top: -40px;
     // padding: 0 10px;
     // column-count: 2;
-
     > .item {
         // break-inside: avoid;
         // padding: 0 10px;
@@ -142,7 +212,7 @@ Page({
         box-sizing: border-box;
         box-shadow: 0px 3px 30px rgba(0, 0, 0, 0.06);
         opacity: 1;
-        border-radius: 6px;
+        border-radius: 6rpx;
     }
 }
 </style>
