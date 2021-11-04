@@ -81,6 +81,7 @@ function changeAttr(object) {
 }
 
 module.exports = function (content) {
+    console.log({ wxml: 1, content });
     const { _compiler, resource, resourcePath, request, resourceQuery, target, minimize, sourceMap, context, rootContext } = this;
     this.callback(null, `export default ''`);
     const { dirSrc, fileName } = usePathInfo(resourcePath);

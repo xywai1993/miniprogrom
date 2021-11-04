@@ -3,6 +3,7 @@ const qs = require('querystring');
 const { VueLoaderPlugin } = require('vue-loader');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const glob = require('glob');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 function resolve(dir) {
     return path.join(__dirname, dir);
@@ -22,7 +23,8 @@ const pagesEntry = getEntry(resolve('./test-src'), '/pages/**/main.vue');
 const component = getEntry(resolve('./test-src'), '/components/**/main.vue');
 // const pagesEntryB = getEntry(resolve('./src'), '/packageb/pages/**/main.js');
 // const pagesEntryC = getEntry(resolve('./src'), '/packagec/pages/**/main.js');
-const entry = Object.assign({}, appEntry, pagesEntry, component);
+// const entry = Object.assign({}, appEntry, pagesEntry, component);
+const entry = Object.assign({}, pagesEntry);
 
 console.log(entry);
 
@@ -84,6 +86,17 @@ module.exports = {
 
             {
                 test: /\.vue$/,
+                oneOf: [
+                    {
+                        resourceQuery: /css/, // foo.css?inline
+                        use: [MiniCssExtractPlugin.loader, 'css-loader', 'less-loader'],
+                    },
+                    {
+                        resourceQuery: /template/, // foo.css?external
+                        use: ['wxml-loader'],
+                    },
+                ],
+                // use: ['demo-loader'],
                 use: [
                     {
                         loader: path.resolve(__dirname, './loader/demo-loader.cjs'),
@@ -103,13 +116,16 @@ module.exports = {
             //     },
             // },
 
-            {
-                test: /.css$/i,
-                use: ['css-loader'],
-            },
+            // {
+            //     test: /.css$/i,
+            //     use: ['css-loader'],
+            // },
         ],
     },
     plugins: [
+        new MiniCssExtractPlugin({
+            filename: '[name].wxss',
+        }),
         new CopyWebpackPlugin({
             patterns: [
                 {
