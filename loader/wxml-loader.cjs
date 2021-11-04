@@ -1,6 +1,7 @@
 const path = require('path');
 const { html2json, json2html } = require('html2json');
 const compiler = require('vue-template-compiler');
+const { parse: vueSFCParse, compileScript } = require('@vue/compiler-sfc');
 
 const result = compiler.compile('<div @click="hello" > <p>22</p> </div>', {
     directives: {
@@ -81,18 +82,33 @@ function changeAttr(object) {
 }
 
 module.exports = function (content) {
-    console.log({ wxml: 1, content });
-    const { _compiler, resource, resourcePath, request, resourceQuery, target, minimize, sourceMap, context, rootContext } = this;
-    this.callback(null, `export default ''`);
+    const { _compiler, resource, resourcePath, request, resourceQuery, target, minimize, sourceMap, context, rootContext, query } = this;
+
+    // this.callback(null, `export default ''`);
     const { dirSrc, fileName } = usePathInfo(resourcePath);
     const rootPath = path.join(rootContext, 'test-src');
     const basePathContext = context.replace(rootPath, '');
 
-    let templateJson = html2json(content);
+    // let templateJson = html2json(content);
 
+    // templateJson.child = transformTmp(templateJson.child);
+
+    // // const callback = this.async();
+
+    const result = vueSFCParse(content);
+    const descriptor = result.descriptor;
+    const templateContent = descriptor.template.content;
+    let templateJson = html2json(templateContent);
     templateJson.child = transformTmp(templateJson.child);
 
-    // const callback = this.async();
+    if (result.descriptor.customBlocks.length) {
+        result.descriptor.customBlocks.forEach((item) => {
+            if (item.type === 'config') {
+                this.emitFile(path.join(basePathContext, fileName + '.json'), item.content);
+            }
+        });
+    }
+
     this.emitFile(path.join(basePathContext, fileName + '.wxml'), json2html(templateJson));
-    // return `export default ''`;
+    return '';
 };

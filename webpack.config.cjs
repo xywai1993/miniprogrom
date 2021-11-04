@@ -23,10 +23,7 @@ const pagesEntry = getEntry(resolve('./test-src'), '/pages/**/main.vue');
 const component = getEntry(resolve('./test-src'), '/components/**/main.vue');
 // const pagesEntryB = getEntry(resolve('./src'), '/packageb/pages/**/main.js');
 // const pagesEntryC = getEntry(resolve('./src'), '/packagec/pages/**/main.js');
-// const entry = Object.assign({}, appEntry, pagesEntry, component);
-const entry = Object.assign({}, pagesEntry);
-
-console.log(entry);
+const entry = Object.assign({}, appEntry, pagesEntry, component);
 
 module.exports = {
     entry,
@@ -75,7 +72,7 @@ module.exports = {
                 //     name: utils.assetsPath('img/[name].[hash:5].[ext]'),
                 // },
                 generator: {
-                    filename: 'img/[hash][ext][query]',
+                    filename: 'img/[name].[hash:5][ext]',
                 },
                 // parser: {
                 //     dataUrlCondition: {
@@ -89,7 +86,7 @@ module.exports = {
                 oneOf: [
                     {
                         resourceQuery: /css/, // foo.css?inline
-                        use: [MiniCssExtractPlugin.loader, 'css-loader', 'less-loader'],
+                        use: [MiniCssExtractPlugin.loader, 'css-loader', 'less-loader', 'wxss-loader'],
                     },
                     {
                         resourceQuery: /template/, // foo.css?external

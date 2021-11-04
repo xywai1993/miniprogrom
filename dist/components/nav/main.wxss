@@ -1,0 +1,65 @@
+.formbtn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  line-height: 15px;
+}
+.footer {
+  position: fixed;
+  bottom: 0;
+  padding-bottom: env(safe-area-inset-bottom);
+  left: 0;
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  height: 49px;
+  background: #ffffff;
+  box-shadow: 0px -4px 10px 0px rgba(0, 0, 0, 0.04);
+}
+.item {
+  flex: 1;
+}
+.item .icon {
+  margin: 10px auto 0;
+  width: 24px;
+  height: 24px;
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: 100% auto;
+}
+.item .item-title {
+  font-size: 9px;
+  font-family: PingFangSC-Regular;
+  font-weight: 400;
+  color: #999999;
+  text-align: center;
+}
+.icon-a {
+  background-image: url(img/a-icon.49ec7.png);
+}
+.icon-b {
+  background-image: url(img/b-icon.6b89b.png);
+}
+.icon-c {
+  background-image: url(img/c-icon.67ee3.png);
+}
+.icon-d {
+  background-image: url(img/d-icon.67ee3.png);
+}
+.on .icon-a {
+  background-image: url(img/a-on-icon.41ef0.png);
+}
+.on .icon-b {
+  background-image: url(img/b-on-icon.8ffa3.png);
+}
+.on .icon-c {
+  background-image: url(img/c-icon.67ee3.png);
+}
+.on .icon-d {
+  background-image: url(img/d-on-icon.7f0f9.png);
+}
+.on .item-title {
+  color: #fc8686;
+}
+

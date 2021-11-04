@@ -1,0 +1,1 @@
+(()=>{"use strict";Component({properties:{innerText:{type:String,value:"default value"}},data:{someData:{}},methods:{customMethod:function(){console.log(112233)}}})})();

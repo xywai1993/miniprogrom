@@ -1,0 +1,31 @@
+
+    <view class="body">
+        <!-- <mp-navigation-bar :ext-class="'nav-bar'" :background="bgColor" :title="title" :back="false" color="#FFF">
+            <view slot="left" v-show="!title">
+                <input type="text" class="top-search" placeholder="2021年待产包清单" @confirm="confirm" @blur="searchBlur" />
+            </view>
+        </mp-navigation-bar> -->
+        <button v-on:click="showMe" bind:tap="showMe">点我</button>
+        <view class="g-flex-center header">
+            <input type="text" v-show="title" class="search" placeholder="2021年待产包清单"/>
+        </view>
+
+        <view class="grid" v-if="show" wx:if="{{show}}">
+            <view>
+                <view class="list-wrap">
+                    <view v-for="li in arr" class="item">
+                        <demo-tag></demo-tag>
+                    </view>
+                </view>
+            </view>
+            <view>
+                <view class="list-wrap">
+                    <view v-for="li in list2" class="item">
+                        <list-tag :tag-data="li"></list-tag>
+                    </view>
+                </view>
+            </view>
+        </view>
+
+        <nav-nav hover="a"></nav-nav>
+    </view>
