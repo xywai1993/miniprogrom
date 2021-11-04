@@ -28,8 +28,8 @@ const entry = Object.assign({}, appEntry, pagesEntry, component);
 console.log({ entry });
 module.exports = {
     entry,
-    // mode: 'development',
-    mode: 'production',
+    mode: 'development',
+    // mode: 'production',
     target: 'node',
     // output: { path: path.resolve(__dirname, './miniprogram') },
     output: {
@@ -125,6 +125,9 @@ module.exports = {
             //     use: ['css-loader'],
             // },
         ],
+    },
+    node: {
+        global: false,
     },
     plugins: [
         new MiniCssExtractPlugin({

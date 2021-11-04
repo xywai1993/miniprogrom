@@ -1,3 +1,6 @@
+/*!*****************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/less-loader/dist/cjs.js!./loader/wxss-loader.cjs!./test-src/pages/index/main.vue?css ***!
+  \*****************************************************************************************************************************************************/
 .body {
   padding-bottom: calc(80px + env(safe-area-inset-bottom));
   background-color: #f2f2f2;

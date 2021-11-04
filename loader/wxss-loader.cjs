@@ -34,6 +34,6 @@ module.exports = function (content) {
     const descriptor = result.descriptor;
     const templateContent = descriptor.template.content;
     const styleContent = result.descriptor.styles[0].content;
-
+    console.log(styleContent);
     return styleContent;
 };
