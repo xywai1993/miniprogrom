@@ -9,7 +9,7 @@
             <input type="text" v-show="title" class="search" placeholder="2021年待产包清单" />
         </div>
 
-        <div v-for="(li, index) in list1">{{ li.material_id }}</div>
+        <div v-for="(li, index) in list1" :key="index">{{ li.material_id }}</div>
         <div class="grid">
             <view>
                 <ul class="list-wrap">

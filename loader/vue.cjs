@@ -50,11 +50,48 @@ function changeElementName(tagName) {
     return tagName;
 }
 
-const template = `<div @click="change" v-show="abc"  a='a' b='b' c=3><p v-for="(li,index) in list1" :key="li.id">{{li.id}}</p></div>`;
+function removeQuote(str, single = false) {
+    return single ? str.replace(/\'/g, '') : str.replace(/\"/g, '');
+}
+
+// const template = `<div class="body {{some?'a':'b'}}" :class="{a:some}"  @click="change" v-show="abc"   c=3><p v-for="(li,index) in list1" :key="li.id">{{li.id}}</p></div>`;
+
+const template = `
+<div class="body">
+       <mp-navigation-bar :ext-class="'nav-bar'" :background="bgColor" :title="title" :back="false" color="#FFF">
+            <view slot="left" v-show="!title">
+                <input type="text" class="top-search" placeholder="2021年待产包清单" @confirm="confirm" @blur="searchBlur" />
+            </view>
+        </mp-navigation-bar>
+        <div class="g-flex-center header">
+            <input type="text" v-show="title" class="search" placeholder="2021年待产包清单" />
+        </div>
+
+        <div v-for="(li, index) in list1">{{ li.material_id }}</div>
+        <div class="grid">
+            <view>
+                <ul class="list-wrap">
+                    <li wx:for="{{list1}}" wx:key="material_id" class="item">
+                        <list-tag tagData="{{item}}"></list-tag>
+                    </li>
+                </ul>
+            </view>
+
+            <view>
+                <ul class="list-wrap">
+                    <li wx:for="{{list2}}" wx:key="material_id" class="item">
+                        <list-tag tagData="{{item}}"></list-tag>
+                    </li>
+                </ul>
+            </view>
+        </div>
+
+        <nav-nav hover="a"></nav-nav>
+    </div>
+`;
 
 function t(children) {
     return children.map((item) => {
-        console.log(item);
         const o = { node: '', type: 1, tag: '', text: '', attr: {}, child: [] };
         o.tag = item.tag;
         o.type = item.type;
@@ -92,7 +129,7 @@ function t(children) {
             // eg:  li.id to id  wx:key={{id}}
             if (item.key) {
                 var re = new RegExp(`^${item.alias}\.`);
-                o.attr['wx:key'] = `{{${item.key.replace(re, '')}}}`;
+                o.attr['wx:key'] = `${item.key.replace(re, '')}`;
             }
         }
 
@@ -116,10 +153,34 @@ function t(children) {
             //     console.log(key);
             // }
 
-            Object.entries(item.events).forEach((key, val) => {
-                console.log(key);
+            Object.entries(item.events).forEach((key) => {
                 if (key[0] == 'click') {
                     o.attr['bind:tap'] = key[1].value;
+                } else {
+                    o.attr[`bind:${key[0]}`] = key[1].value;
+                }
+            });
+        }
+
+        if (item.staticClass) {
+            if (o.attr.class) {
+                o.attr.class.push(item.staticClass);
+            } else {
+                o.attr['class'] = [removeQuote(item.staticClass)];
+            }
+        }
+
+        if (item.classBinding) {
+            // '{a:some}' 转换为 [{a:some}]
+
+            const classArr = removeQuote(item.classBinding, true).replace(/{|}/g, '').split(',');
+            classArr.forEach((str) => {
+                const val = str.split(':');
+                const c = `{{${val[1]}?${val[0]}:null}}`;
+                if (o.attr.class) {
+                    o.attr.class.push(c);
+                } else {
+                    o.attr['class'] = [c];
                 }
             });
         }

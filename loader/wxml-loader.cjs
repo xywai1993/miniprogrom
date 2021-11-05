@@ -80,6 +80,6 @@ module.exports = function (content) {
     }
 
     // this.emitFile(path.join(basePathContext, fileName + '.wxml'), json2html(templateJson));
-    this.emitFile(path.join(basePathContext, fileName + '.wxml'), template2WxTemplate(templateContent));
+    this.emitFile(path.join(basePathContext, fileName + '.wxml'), templateContent ? template2WxTemplate(templateContent) : '');
     return '';
 };
