@@ -1,42 +1,8 @@
 const path = require('path');
 const { html2json, json2html } = require('html2json');
 const compiler = require('vue-template-compiler');
-const { parse: vueSFCParse, compileScript } = require('@vue/compiler-sfc');
-
-const result = compiler.compile('<div @click="hello" > <p>22</p> </div>', {
-    directives: {
-        test(node, directiveMeta) {
-            // transform node based on directiveMeta
-            // console.log({ node, directiveMeta });
-            node.tag = 'h1';
-            return node;
-        },
-    },
-});
-
-/**
- * 
- * @param ast 
- * {
-    type: 1,
-    tag: 'div',
-    attrsList: [ [Object] ],
-    attrsMap: { '@click': 'hello' },
-    rawAttrsMap: {},
-    parent: undefined,
-    children: [ [Object] ],
-    plain: false,
-    hasBindings: true,
-    events: { click: [Object] },
-    static: false,
-    staticRoot: false
-  }
- */
-function astToTemplate(ast) {
-    if (ast.type === 1) {
-        ``;
-    }
-}
+const { parse: vueSFCParse, compileScript, compileTemplate } = require('@vue/compiler-sfc');
+const template2WxTemplate = require('./vue.cjs');
 
 function usePathInfo(src) {
     const dirSrc = path.dirname(src);
@@ -51,7 +17,7 @@ function usePathInfo(src) {
 }
 
 function transformTmp(nodeChild) {
-    const list = ['div', 'h1', 'p', 'ul', 'li'];
+    const list = ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'li'];
 
     return nodeChild.map((item) => {
         if (item.node == 'element') {
@@ -77,6 +43,10 @@ function changeAttr(object) {
 
     if (object.hasOwnProperty('v-on:click')) {
         object['bind:tap'] = `${object['v-on:click']}`;
+    }
+
+    if (object.hasOwnProperty('v-for')) {
+        // console.log(object['v-for']);
     }
     return object;
 }
@@ -109,6 +79,7 @@ module.exports = function (content) {
         });
     }
 
-    this.emitFile(path.join(basePathContext, fileName + '.wxml'), json2html(templateJson));
+    // this.emitFile(path.join(basePathContext, fileName + '.wxml'), json2html(templateJson));
+    this.emitFile(path.join(basePathContext, fileName + '.wxml'), template2WxTemplate(templateContent));
     return '';
 };

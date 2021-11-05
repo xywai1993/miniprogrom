@@ -160,7 +160,6 @@ Page({
         data.list2 = list2;
     },
     onReachBottom() {
-        console.log(5);
         if (data.page_size <= data.total_page) {
             const page = data.page_size + 1;
             console.log(data.page_size);

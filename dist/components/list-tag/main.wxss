@@ -10,6 +10,9 @@
 .g-img {
   width: 100%;
 }
+.flex {
+  display: flex;
+}
 .tag {
   position: absolute;
   left: 10px;

@@ -9,6 +9,7 @@
             <input type="text" v-show="title" class="search" placeholder="2021年待产包清单" />
         </div>
 
+        <div v-for="(li, index) in list1">{{ li.material_id }}</div>
         <div class="grid">
             <view>
                 <ul class="list-wrap">
@@ -155,7 +156,6 @@ Page({
         data.list2 = list2;
     },
     onReachBottom() {
-        console.log(5);
         if (data.page_size <= data.total_page) {
             const page = data.page_size + 1;
             console.log(data.page_size);

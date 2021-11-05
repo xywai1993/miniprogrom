@@ -1,18 +1,13 @@
 /******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
 /***/ "./test-src/app.vue?template":
 /*!***********************************!*\
   !*** ./test-src/app.vue?template ***!
   \***********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (() => {
 
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ('');
+throw new Error("Module build failed (from ./loader/wxml-loader.cjs):\nTypeError: Cannot read property 'tag' of undefined\n    at /Users/yiper/otherdemo/miniprogrom/loader/vue.cjs:59:22\n    at Array.map (<anonymous>)\n    at t (/Users/yiper/otherdemo/miniprogrom/loader/vue.cjs:56:21)\n    at template2WxTemplate (/Users/yiper/otherdemo/miniprogrom/loader/vue.cjs:140:45)\n    at Object.module.exports (/Users/yiper/otherdemo/miniprogrom/loader/wxml-loader.cjs:83:67)");
 
 /***/ }),
 
@@ -22,6 +17,7 @@ __webpack_require__.r(__webpack_exports__);
   \******************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -36,8 +32,10 @@ __webpack_require__.r(__webpack_exports__);
   \**************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Users_yiper_otherdemo_miniprogrom_test_src_app_vue_template__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./test-src/app.vue?template */ "./test-src/app.vue?template");
+/* harmony import */ var _Users_yiper_otherdemo_miniprogrom_test_src_app_vue_template__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_Users_yiper_otherdemo_miniprogrom_test_src_app_vue_template__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Users_yiper_otherdemo_miniprogrom_test_src_app_vue_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./test-src/app.vue?css */ "./test-src/app.vue?css");
 /* harmony import */ var _vue_reactivity__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @vue/reactivity */ "./node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js");
 /* harmony import */ var _util_test__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./util/test */ "./test-src/util/test.js");
@@ -80,6 +78,7 @@ App({
   \*****************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "envList": () => (/* binding */ envList)
@@ -100,6 +99,7 @@ const envList = [
   \*******************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "a": () => (/* binding */ a),
@@ -136,6 +136,7 @@ console.log('helloworld-12333');
   \********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "add": () => (/* binding */ add)
@@ -151,6 +152,7 @@ const add = (a, b) => a + b;
   \********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "test3": () => (/* binding */ test3)
@@ -228,6 +230,18 @@ const test3 = 'tes311';
 /******/ 				}
 /******/ 			}
 /******/ 			return result;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
 /******/ 		};
 /******/ 	})();
 /******/ 	
