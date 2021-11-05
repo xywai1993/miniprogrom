@@ -5,7 +5,6 @@
                 <input type="text" class="top-search" placeholder="2021年待产包清单" @confirm="confirm" @blur="searchBlur" />
             </view>
         </mp-navigation-bar> -->
-        <button v-on:click="showMe" bind:tap="showMe">点我</button>
         <view class="g-flex-center header">
             <input type="text" v-show="title" class="search" placeholder="2021年待产包清单"/>
         </view>

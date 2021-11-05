@@ -71,6 +71,7 @@ module.exports = function (content, map, meta) {
 
 module.exports.pitch = function (a) {
     if (/\.vue$/.test(a)) {
+        this.addDependency(a);
         const content2 = readFileSync(a, { encoding: 'utf-8' });
         const result = vueSFCParse(content2);
         const descriptor = result.descriptor;

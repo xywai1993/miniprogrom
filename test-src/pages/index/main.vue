@@ -5,7 +5,6 @@
                 <input type="text" class="top-search" placeholder="2021年待产包清单" @confirm="confirm" @blur="searchBlur" />
             </view>
         </mp-navigation-bar> -->
-        <button v-on:click="showMe">点我</button>
         <div class="g-flex-center header">
             <input type="text" v-show="title" class="search" placeholder="2021年待产包清单" />
         </div>
@@ -124,10 +123,10 @@ Page({
     },
     confirm(e) {
         console.log(e.target.value);
-        GetMaterials('', e.target.value).then((data) => {
-            console.log(data);
-
-            this.createGrid(data.list);
+        GetMaterials('', e.target.value).then((da) => {
+            this.createGrid(da.list);
+            data.page_size = da.page_size;
+            data.total_page = da.total_page;
         });
     },
     searchBlur(e) {
@@ -155,6 +154,18 @@ Page({
         data.list1 = list1;
         data.list2 = list2;
     },
+    onReachBottom() {
+        console.log(5);
+        if (data.page_size <= data.total_page) {
+            const page = data.page_size + 1;
+            console.log(data.page_size);
+            GetMaterials('', '', page).then((d) => {
+                data.page_size = page;
+                data.list = [...data.list, ...d.list];
+                this.createGrid(data.list);
+            });
+        }
+    },
 });
 </script>
 
@@ -163,14 +174,16 @@ Page({
     padding-bottom: calc(80px + env(safe-area-inset-bottom));
     background-color: #f2f2f2;
     min-height: 100vh;
+    overflow: hidden;
 }
 .header {
     // margin-top: calc(-44px - env(safe-area-inset-top));
     width: 100%;
     height: 252px;
-    // background: url('./static/souyebg@2x.png') center no-repeat;
+    background: url('./static/souyebg@2x.png') left top no-repeat;
     background-size: contain;
     opacity: 1;
+    overflow: hidden;
 }
 .search {
     margin-top: 10px;
@@ -180,7 +193,7 @@ Page({
     box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.13);
     opacity: 1;
     border-radius: 27px;
-    // background: #fff url('./static/search-icon@2x.png') 10px center/18px auto no-repeat;
+    background: #fff url('./static/search-icon@2x.png') 10px center/18px auto no-repeat;
 }
 .top-search {
     width: 210px;

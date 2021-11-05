@@ -29,6 +29,7 @@ console.log({ entry });
 module.exports = {
     entry,
     mode: 'development',
+    devtool: false,
     // mode: 'production',
     target: 'node',
     // output: { path: path.resolve(__dirname, './miniprogram') },
@@ -126,9 +127,7 @@ module.exports = {
             // },
         ],
     },
-    node: {
-        global: false,
-    },
+    node: false,
     plugins: [
         new MiniCssExtractPlugin({
             filename: '[name].wxss',

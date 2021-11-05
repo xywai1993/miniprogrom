@@ -1,11 +1,3 @@
-/*
- * ATTENTION: The "eval" devtool has been used (maybe by default in mode: "development").
- * This devtool is neither made for production nor for readable output files.
- * It uses "eval()" calls to create a separate source file in the browser devtools.
- * If you are trying to read the output file, select a different devtool (https://webpack.js.org/configuration/devtool/)
- * or disable the default devtool with "devtool: false".
- * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
- */
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
@@ -16,7 +8,11 @@
   \********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ('');\n\n//# sourceURL=webpack://@yiper.fan/mini-program-builder/./test-src/components/list-tag/main.vue?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ('');
 
 /***/ }),
 
@@ -26,17 +22,11 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
   \***************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ('');\n\n//# sourceURL=webpack://@yiper.fan/mini-program-builder/./test-src/components/list-tag/main.vue?");
-
-/***/ }),
-
-/***/ "./test-src/components/list-tag/main.vue":
-/*!***********************************************!*\
-  !*** ./test-src/components/list-tag/main.vue ***!
-  \***********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _Users_yiper_otherdemo_miniprogrom_test_src_components_list_tag_main_vue_template__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./test-src/components/list-tag/main.vue?template */ \"./test-src/components/list-tag/main.vue?template\");\n/* harmony import */ var _Users_yiper_otherdemo_miniprogrom_test_src_components_list_tag_main_vue_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./test-src/components/list-tag/main.vue?css */ \"./test-src/components/list-tag/main.vue?css\");\n\n        \n        \n        \nComponent({\n    properties: {\n        // 这里定义了innerText属性，属性值可以在组件使用时指定\n        tagData: {\n            type: Object,\n            value: {\n                material_id: 1,\n                title: 'nihao',\n                type: 1,\n                cover: '',\n                like_count: 0,\n                category_ids: [],\n                author: { nickname: '11', avatar: '22' },\n            },\n            observer: function (newVal, oldVal) {\n                // 属性值变化时执行\n                console.log(newVal, oldVal);\n            },\n        },\n    },\n    data: {\n        // 这里是一些组件内部数据\n        someData: {},\n    },\n    methods: {\n        // 这里是一个自定义方法\n        customMethod: function () {\n            console.log(112233);\n        },\n    },\n    lifetimes: {\n        // 生命周期函数，可以为函数，或一个在methods段中定义的方法名\n        attached: function () {\n            console.log(this);\n        },\n        moved: function () {},\n        detached: function () {},\n    },\n});\n\n// export default {\n//     props: {\n//         tagData: {\n//             type: Object,\n//             default: () => {\n//                 return {\n//                     material_id: 1,\n//                     title: '',\n//                     type: 1,\n//                     cover: '',\n//                     like_count: 0,\n//                     category_ids: [],\n//                     author: { nickname: '', avatar: '' },\n//                 };\n//             },\n//         },\n//     },\n//     data() {\n//         let tag = '';\n\n//         switch (Number(this.tagData.type)) {\n//             case 1:\n//                 tag = 'tuwen';\n//                 break;\n//             case 2:\n//                 tag = 'tiaomu';\n//                 break;\n//             case 3:\n//                 tag = 'shiping';\n//                 break;\n//             case 4:\n//                 tag = 'yinping';\n//                 break;\n//             case 5:\n//                 tag = 'dati';\n//                 break;\n//         }\n//         return {\n//             tag: tag,\n//         };\n//     },\n//     computed: {},\n//     methods: {},\n// };\n\n        \n\n//# sourceURL=webpack://@yiper.fan/mini-program-builder/./test-src/components/list-tag/main.vue?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ('');
 
 /***/ })
 
@@ -96,11 +86,103 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _Use
 /******/ 	})();
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module can't be inlined because the eval devtool is used.
-/******/ 	var __webpack_exports__ = __webpack_require__("./test-src/components/list-tag/main.vue");
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+/*!***********************************************!*\
+  !*** ./test-src/components/list-tag/main.vue ***!
+  \***********************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Users_yiper_otherdemo_miniprogrom_test_src_components_list_tag_main_vue_template__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./test-src/components/list-tag/main.vue?template */ "./test-src/components/list-tag/main.vue?template");
+/* harmony import */ var _Users_yiper_otherdemo_miniprogrom_test_src_components_list_tag_main_vue_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./test-src/components/list-tag/main.vue?css */ "./test-src/components/list-tag/main.vue?css");
+
+        
+        
+        
+Component({
+    properties: {
+        // 这里定义了innerText属性，属性值可以在组件使用时指定
+        tagData: {
+            type: Object,
+            value: {
+                material_id: 1,
+                title: 'nihao',
+                type: 1,
+                cover: '',
+                like_count: 0,
+                category_ids: [],
+                author: { nickname: '11', avatar: '22' },
+            },
+            observer: function (newVal, oldVal) {
+                // 属性值变化时执行
+            },
+        },
+    },
+    data: {
+        // 这里是一些组件内部数据
+        someData: {},
+    },
+    methods: {
+        // 这里是一个自定义方法
+        customMethod: function () {
+            console.log(112233);
+        },
+    },
+    lifetimes: {
+        // 生命周期函数，可以为函数，或一个在methods段中定义的方法名
+        attached: function () {},
+        moved: function () {},
+        detached: function () {},
+    },
+});
+
+// export default {
+//     props: {
+//         tagData: {
+//             type: Object,
+//             default: () => {
+//                 return {
+//                     material_id: 1,
+//                     title: '',
+//                     type: 1,
+//                     cover: '',
+//                     like_count: 0,
+//                     category_ids: [],
+//                     author: { nickname: '', avatar: '' },
+//                 };
+//             },
+//         },
+//     },
+//     data() {
+//         let tag = '';
+
+//         switch (Number(this.tagData.type)) {
+//             case 1:
+//                 tag = 'tuwen';
+//                 break;
+//             case 2:
+//                 tag = 'tiaomu';
+//                 break;
+//             case 3:
+//                 tag = 'shiping';
+//                 break;
+//             case 4:
+//                 tag = 'yinping';
+//                 break;
+//             case 5:
+//                 tag = 'dati';
+//                 break;
+//         }
+//         return {
+//             tag: tag,
+//         };
+//     },
+//     computed: {},
+//     methods: {},
+// };
+
+        
+})();
+
 /******/ })()
 ;

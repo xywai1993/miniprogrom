@@ -33,7 +33,9 @@
         "watch": "cross-env NODE_ENV=development node --loader ts-node/esm src/watch.ts",
         "tsc": "tsc",
         "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest",
-        "webpack": "webpack -w "
+        "webpack": "webpack -w ",
+        "http-server": "http-server -p 3333 -d dist",
+        "webpack:build": "webpack --mode production"
     },
     "devDependencies": {
         "@babel/plugin-syntax-import-meta": "^7.10.4",
