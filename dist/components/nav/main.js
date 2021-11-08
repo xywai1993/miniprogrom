@@ -28,6 +28,49 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ('');
 
+/***/ }),
+
+/***/ "./test-src/components/nav/main.vue":
+/*!******************************************!*\
+  !*** ./test-src/components/nav/main.vue ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Users_yiper_otherdemo_miniprogrom_test_src_components_nav_main_vue_template__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./test-src/components/nav/main.vue?template */ "./test-src/components/nav/main.vue?template");
+/* harmony import */ var _Users_yiper_otherdemo_miniprogrom_test_src_components_nav_main_vue_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./test-src/components/nav/main.vue?css */ "./test-src/components/nav/main.vue?css");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../utils/utils */ "./test-src/utils/utils.js");
+
+        
+        
+        
+
+Component({
+    properties: {
+        // 这里定义了innerText属性，属性值可以在组件使用时指定
+        hover: {
+            type: String,
+            value: 'a',
+        },
+    },
+    data: {
+        // 这里是一些组件内部数据
+        someData: {},
+    },
+    methods: {
+        // 这里是一个自定义方法
+        customMethod: function () {
+            console.log(112233);
+        },
+        goTo(url) {
+            console.log(url);
+            // goTo('sort');
+        },
+    },
+});
+
+        
+
 /***/ })
 
 /******/ 	});
@@ -56,7 +99,51 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 		return module.exports;
 /******/ 	}
 /******/ 	
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = __webpack_modules__;
+/******/ 	
+/******/ 	// the startup function
+/******/ 	__webpack_require__.x = () => {
+/******/ 		// Load entry module and return exports
+/******/ 		// This entry module depends on other loaded chunks and execution need to be delayed
+/******/ 		var __webpack_exports__ = __webpack_require__.O(undefined, ["test-src_utils_utils_js"], () => (__webpack_require__("./test-src/components/nav/main.vue")))
+/******/ 		__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
+/******/ 		return __webpack_exports__;
+/******/ 	};
+/******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/chunk loaded */
+/******/ 	(() => {
+/******/ 		var deferred = [];
+/******/ 		__webpack_require__.O = (result, chunkIds, fn, priority) => {
+/******/ 			if(chunkIds) {
+/******/ 				priority = priority || 0;
+/******/ 				for(var i = deferred.length; i > 0 && deferred[i - 1][2] > priority; i--) deferred[i] = deferred[i - 1];
+/******/ 				deferred[i] = [chunkIds, fn, priority];
+/******/ 				return;
+/******/ 			}
+/******/ 			var notFulfilled = Infinity;
+/******/ 			for (var i = 0; i < deferred.length; i++) {
+/******/ 				var [chunkIds, fn, priority] = deferred[i];
+/******/ 				var fulfilled = true;
+/******/ 				for (var j = 0; j < chunkIds.length; j++) {
+/******/ 					if ((priority & 1 === 0 || notFulfilled >= priority) && Object.keys(__webpack_require__.O).every((key) => (__webpack_require__.O[key](chunkIds[j])))) {
+/******/ 						chunkIds.splice(j--, 1);
+/******/ 					} else {
+/******/ 						fulfilled = false;
+/******/ 						if(priority < notFulfilled) notFulfilled = priority;
+/******/ 					}
+/******/ 				}
+/******/ 				if(fulfilled) {
+/******/ 					deferred.splice(i--, 1)
+/******/ 					var r = fn();
+/******/ 					if (r !== undefined) result = r;
+/******/ 				}
+/******/ 			}
+/******/ 			return result;
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -66,6 +153,37 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
 /******/ 				}
 /******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/ensure chunk */
+/******/ 	(() => {
+/******/ 		__webpack_require__.f = {};
+/******/ 		// This file contains only the entry chunk.
+/******/ 		// The chunk loading function for additional chunks
+/******/ 		__webpack_require__.e = (chunkId) => {
+/******/ 			return Promise.all(Object.keys(__webpack_require__.f).reduce((promises, key) => {
+/******/ 				__webpack_require__.f[key](chunkId, promises);
+/******/ 				return promises;
+/******/ 			}, []));
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/get javascript chunk filename */
+/******/ 	(() => {
+/******/ 		// This function allow to reference async chunks and sibling chunks for the entrypoint
+/******/ 		__webpack_require__.u = (chunkId) => {
+/******/ 			// return url for filenames based on template
+/******/ 			return "" + chunkId + ".js";
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/get mini-css chunk filename */
+/******/ 	(() => {
+/******/ 		// This function allow to reference all chunks
+/******/ 		__webpack_require__.miniCssF = (chunkId) => {
+/******/ 			// return url for filenames based on template
+/******/ 			return "" + chunkId + ".wxss";
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -85,42 +203,66 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 		};
 /******/ 	})();
 /******/ 	
+/******/ 	/* webpack/runtime/publicPath */
+/******/ 	(() => {
+/******/ 		__webpack_require__.p = "http://localhost:3333/dist/";
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/require chunk loading */
+/******/ 	(() => {
+/******/ 		// no baseURI
+/******/ 		
+/******/ 		// object to store loaded chunks
+/******/ 		// "1" means "loaded", otherwise not loaded yet
+/******/ 		var installedChunks = {
+/******/ 			"components/nav/main": 1
+/******/ 		};
+/******/ 		
+/******/ 		__webpack_require__.O.require = (chunkId) => (installedChunks[chunkId]);
+/******/ 		
+/******/ 		var installChunk = (chunk) => {
+/******/ 			var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;
+/******/ 			for(var moduleId in moreModules) {
+/******/ 				if(__webpack_require__.o(moreModules, moduleId)) {
+/******/ 					__webpack_require__.m[moduleId] = moreModules[moduleId];
+/******/ 				}
+/******/ 			}
+/******/ 			if(runtime) runtime(__webpack_require__);
+/******/ 			for(var i = 0; i < chunkIds.length; i++)
+/******/ 				installedChunks[chunkIds[i]] = 1;
+/******/ 			__webpack_require__.O();
+/******/ 		};
+/******/ 		
+/******/ 		// require() chunk loading for javascript
+/******/ 		__webpack_require__.f.require = (chunkId, promises) => {
+/******/ 			// "1" is the signal for "already loaded"
+/******/ 			if(!installedChunks[chunkId]) {
+/******/ 				if(true) { // all chunks have JS
+/******/ 					installChunk(require("../../" + __webpack_require__.u(chunkId)));
+/******/ 				} else installedChunks[chunkId] = 1;
+/******/ 			}
+/******/ 		};
+/******/ 		
+/******/ 		// no external install chunk
+/******/ 		
+/******/ 		// no HMR
+/******/ 		
+/******/ 		// no HMR manifest
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/startup chunk dependencies */
+/******/ 	(() => {
+/******/ 		var next = __webpack_require__.x;
+/******/ 		__webpack_require__.x = () => {
+/******/ 			__webpack_require__.e("test-src_utils_utils_js");
+/******/ 			return next();
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-(() => {
-/*!******************************************!*\
-  !*** ./test-src/components/nav/main.vue ***!
-  \******************************************/
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _Users_yiper_otherdemo_miniprogrom_test_src_components_nav_main_vue_template__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./test-src/components/nav/main.vue?template */ "./test-src/components/nav/main.vue?template");
-/* harmony import */ var _Users_yiper_otherdemo_miniprogrom_test_src_components_nav_main_vue_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./test-src/components/nav/main.vue?css */ "./test-src/components/nav/main.vue?css");
-
-        
-        
-        
-Component({
-    properties: {
-        // 这里定义了innerText属性，属性值可以在组件使用时指定
-        hover: {
-            type: String,
-            value: 'a',
-        },
-    },
-    data: {
-        // 这里是一些组件内部数据
-        someData: {},
-    },
-    methods: {
-        // 这里是一个自定义方法
-        customMethod: function () {
-            console.log(112233);
-        },
-    },
-});
-
-        
-})();
-
+/******/ 	
+/******/ 	// run startup
+/******/ 	var __webpack_exports__ = __webpack_require__.x();
+/******/ 	
 /******/ })()
 ;

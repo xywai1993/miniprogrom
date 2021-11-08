@@ -59,17 +59,11 @@ module.exports = function (content) {
     const rootPath = path.join(rootContext, 'test-src');
     const basePathContext = context.replace(rootPath, '');
 
-    // let templateJson = html2json(content);
-
-    // templateJson.child = transformTmp(templateJson.child);
-
-    // // const callback = this.async();
-
     const result = vueSFCParse(content);
     const descriptor = result.descriptor;
     const templateContent = descriptor.template.content;
-    let templateJson = html2json(templateContent);
-    templateJson.child = transformTmp(templateJson.child);
+    // let templateJson = html2json(templateContent);
+    // templateJson.child = transformTmp(templateJson.child);
 
     if (result.descriptor.customBlocks.length) {
         result.descriptor.customBlocks.forEach((item) => {

@@ -14,6 +14,7 @@
         "css-loader": "^6.5.0",
         "glob": "^7.2.0",
         "html2json": "^1.0.2",
+        "jsdom": "^16.7.0",
         "less-loader": "^10.2.0",
         "mp-loader": "^0.7.20",
         "mpvue-webpack-target": "^1.0.3",
@@ -33,7 +34,7 @@
         "watch": "cross-env NODE_ENV=development node --loader ts-node/esm src/watch.ts",
         "tsc": "tsc",
         "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest",
-        "webpack": "webpack",
+        "webpack": "webpack -w",
         "http-server": "http-server -p 3333 -d dist",
         "webpack:build": "webpack --mode production",
         "test-vue": "node ./loader/vue.cjs"

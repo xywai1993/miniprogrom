@@ -1,15 +1,14 @@
 <template>
     <div class="body">
-        <!-- <mp-navigation-bar :ext-class="'nav-bar'" :background="bgColor" :title="title" :back="false" color="#FFF">
+        <mp-navigation-bar :ext-class="'nav-bar'" :background="bgColor" :title="title" :back="false" color="#FFF">
             <view slot="left" v-show="!title">
                 <input type="text" class="top-search" placeholder="2021年待产包清单" @confirm="confirm" @blur="searchBlur" />
             </view>
-        </mp-navigation-bar> -->
+        </mp-navigation-bar>
         <div class="g-flex-center header">
             <input type="text" v-show="title" class="search" placeholder="2021年待产包清单" />
         </div>
 
-        <div v-for="(li, index) in list1" :key="index">{{ li.material_id }}</div>
         <div class="grid">
             <view>
                 <ul class="list-wrap">
@@ -39,7 +38,8 @@
         "demo-tag": "/components/demo/main",
         "nav-nav": "/components/nav/main",
         "list-tag": "/components/list-tag/main"
-    }
+    },
+    "navigationStyle": "custom"
 }
 </config>
 <script>

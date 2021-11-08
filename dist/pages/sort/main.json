@@ -1,10 +1,11 @@
 
 {
-    "backgroundColor": "#fff",
+    "navigationStyle": "custom",
+    "disableSwipeBack": true,
+    "disableScroll": true,
     "usingComponents": {
         "demo-tag": "/components/demo/main",
         "nav-nav": "/components/nav/main",
         "list-tag": "/components/list-tag/main"
-    },
-    "navigationStyle": "custom"
+    }
 }

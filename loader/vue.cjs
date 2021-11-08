@@ -1,6 +1,9 @@
 const { html2json, json2html } = require('html2json');
 const compiler = require('vue-template-compiler');
-const { parse: vueSFCParse, compileScript, compileTemplate, transformRef } = require('@vue/compiler-sfc');
+// const { parse: vueSFCParse, compileScript, compileTemplate, transformRef, generateCodeFrame } = require('@vue/compiler-sfc');
+// const { createRenderer, defineComponent, createElementVNode, h, createBlock, ref } = require('vue');
+// const jsdom = require('jsdom');
+// const { JSDOM } = jsdom;
 
 /**
  *{
@@ -54,41 +57,10 @@ function removeQuote(str, single = false) {
     return single ? str.replace(/\'/g, '') : str.replace(/\"/g, '');
 }
 
-// const template = `<div class="body {{some?'a':'b'}}" :class="{a:some}"  @click="change" v-show="abc"   c=3><p v-for="(li,index) in list1" :key="li.id">{{li.id}}</p></div>`;
-
-const template = `
-<div class="body">
-       <mp-navigation-bar :ext-class="'nav-bar'" :background="bgColor" :title="title" :back="false" color="#FFF">
-            <view slot="left" v-show="!title">
-                <input type="text" class="top-search" placeholder="2021年待产包清单" @confirm="confirm" @blur="searchBlur" />
-            </view>
-        </mp-navigation-bar>
-        <div class="g-flex-center header">
-            <input type="text" v-show="title" class="search" placeholder="2021年待产包清单" />
-        </div>
-
-        <div v-for="(li, index) in list1">{{ li.material_id }}</div>
-        <div class="grid">
-            <view>
-                <ul class="list-wrap">
-                    <li wx:for="{{list1}}" wx:key="material_id" class="item">
-                        <list-tag tagData="{{item}}"></list-tag>
-                    </li>
-                </ul>
-            </view>
-
-            <view>
-                <ul class="list-wrap">
-                    <li wx:for="{{list2}}" wx:key="material_id" class="item">
-                        <list-tag tagData="{{item}}"></list-tag>
-                    </li>
-                </ul>
-            </view>
-        </div>
-
-        <nav-nav hover="a"></nav-nav>
-    </div>
-`;
+const template = ` <li class="item " :class="{ on: isActive == 'a' }" v-on:click="goTo">
+<div class="icon icon-a"></div>
+<p class="item-title">首页</p>
+</li>`;
 
 function t(children) {
     return children.map((item) => {
@@ -126,7 +98,7 @@ function t(children) {
                 o.attr['wx:for-index'] = `index`;
             }
 
-            // eg:  li.id to id  wx:key={{id}}
+            // eg:  li.id to id  wx:key="id"
             if (item.key) {
                 var re = new RegExp(`^${item.alias}\.`);
                 o.attr['wx:key'] = `${item.key.replace(re, '')}`;
@@ -143,7 +115,7 @@ function t(children) {
         if (item.directives) {
             item.directives.forEach((directives) => {
                 if (directives.rawName == 'v-show') {
-                    o.attr['hidden'] = `{{${directives.value}}}`;
+                    o.attr['hidden'] = `{{${!directives.value}}}`;
                 }
             });
         }
@@ -171,12 +143,18 @@ function t(children) {
         }
 
         if (item.classBinding) {
-            // '{a:some}' 转换为 [{a:some}]
-
-            const classArr = removeQuote(item.classBinding, true).replace(/{|}/g, '').split(',');
+            // '{a:some}' 转换为 [a:some]
+            const classArr = item.classBinding.replace(/{|}/g, '').split(',');
             classArr.forEach((str) => {
                 const val = str.split(':');
-                const c = `{{${val[1]}?${val[0]}:null}}`;
+                let css = '';
+                try {
+                    eval(val[0]);
+                    css = val[0];
+                } catch (error) {
+                    css = `${val[0]}`;
+                }
+                const c = `{{${val[1]}?${css}:null}}`;
                 if (o.attr.class) {
                     o.attr.class.push(c);
                 } else {

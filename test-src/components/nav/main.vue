@@ -1,10 +1,10 @@
 <template>
     <ul class="footer">
-        <li class="item" :class="{ on: isActive == 'a' }" v-on:click="goTo('a')">
+        <li class="item" :class="{ on: hover == 'a' }" v-on:click="goTo('a')">
             <div class="icon icon-a"></div>
             <p class="item-title">首页</p>
         </li>
-        <li class="item" :class="{ on: isActive == 'b' }" v-on:click="goTo('b')">
+        <li class="item" :class="{ on: hover == 'b' }" v-on:click="goTo('b')">
             <div class="icon icon-b"></div>
             <p class="item-title">清单库</p>
         </li>
@@ -12,7 +12,7 @@
                         <div class="icon icon-c"></div>
                         <p class="item-title">数据</p>
                     </li> -->
-        <li class="item" :class="{ on: isActive == 'd' }" v-on:click="goTo('d')">
+        <li class="item" :class="{ on: hover == 'd' }" v-on:click="goTo('d')">
             <div class="icon icon-d"></div>
             <p class="item-title">我的</p>
         </li>
@@ -24,6 +24,7 @@
 }
 </config>
 <script>
+import { goTo } from '../../utils/utils';
 Component({
     properties: {
         // 这里定义了innerText属性，属性值可以在组件使用时指定
@@ -40,6 +41,10 @@ Component({
         // 这里是一个自定义方法
         customMethod: function () {
             console.log(112233);
+        },
+        goTo(url) {
+            console.log(url);
+            // goTo('sort');
         },
     },
 });
