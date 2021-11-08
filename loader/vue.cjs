@@ -147,13 +147,8 @@ function t(children) {
             const classArr = item.classBinding.replace(/{|}/g, '').split(',');
             classArr.forEach((str) => {
                 const val = str.split(':');
-                let css = '';
-                try {
-                    eval(val[0]);
-                    css = val[0];
-                } catch (error) {
-                    css = `${val[0]}`;
-                }
+                let css = `'${removeQuote(removeQuote(val[0], true))}'`;
+
                 const c = `{{${val[1]}?${css}:null}}`;
                 if (o.attr.class) {
                     o.attr.class.push(c);
