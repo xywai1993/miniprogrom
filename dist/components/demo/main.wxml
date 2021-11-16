@@ -1,1 +1,0 @@
-<view class="demo"><view class="h1">hello world 2223</view> <view bind:tap="{{customMethod}}" class="span">22</view></view>

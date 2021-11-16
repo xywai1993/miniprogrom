@@ -139,6 +139,11 @@ module.exports = {
                     to: '',
                     context: 'test-src/',
                 },
+                {
+                    from: 'static/**',
+                    to: '',
+                    context: 'test-src/',
+                },
             ],
         }),
     ],
