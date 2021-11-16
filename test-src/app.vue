@@ -176,6 +176,11 @@ page {
     justify-content: space-between;
     align-items: center;
 }
+
+.g-flex-start-center {
+    display: flex;
+    align-items: center;
+}
 .flex-row {
     flex-direction: row;
 }

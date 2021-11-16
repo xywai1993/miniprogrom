@@ -94,7 +94,19 @@ module.exports = {
                 oneOf: [
                     {
                         resourceQuery: /css/, // foo.css?inline
-                        use: [MiniCssExtractPlugin.loader, 'css-loader', 'less-loader', 'wxss-loader'],
+                        use: [
+                            MiniCssExtractPlugin.loader,
+                            'css-loader',
+                            {
+                                loader: 'px2rpx-loader',
+                                options: {
+                                    baseDpr: 1,
+                                    rpxUnit: 0.5,
+                                },
+                            },
+                            'less-loader',
+                            'wxss-loader',
+                        ],
                     },
                     {
                         resourceQuery: /template/, // foo.css?external

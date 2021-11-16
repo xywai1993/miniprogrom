@@ -29,6 +29,12 @@
           "pathName": "pages/index/main",
           "query": "",
           "scene": null
+        },
+        {
+          "name": "答题",
+          "pathName": "pages/answer-details/main",
+          "query": "",
+          "scene": null
         }
       ]
     }

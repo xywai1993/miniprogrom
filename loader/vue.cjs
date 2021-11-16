@@ -1,5 +1,6 @@
 const { html2json, json2html } = require('html2json');
 const compiler = require('vue-template-compiler');
+const { visit, parse: recastParse, print, types } = require('recast');
 // const { parse: vueSFCParse, compileScript, compileTemplate, transformRef, generateCodeFrame } = require('@vue/compiler-sfc');
 // const { createRenderer, defineComponent, createElementVNode, h, createBlock, ref } = require('vue');
 // const jsdom = require('jsdom');
@@ -47,8 +48,12 @@ const compiler = require('vue-template-compiler');
 
 function changeElementName(tagName) {
     const blockList = ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'li'];
+    const inlineList = ['span', 'i', 'em'];
     if (blockList.indexOf(tagName) !== -1) {
         return 'view';
+    }
+    if (inlineList.indexOf(tagName) !== -1) {
+        return 'text';
     }
     return tagName;
 }
@@ -58,7 +63,7 @@ function removeQuote(str, single = false) {
 }
 
 const template = ` <li class="item " :class="{ on: isActive == 'a' }" v-on:click="goTo">
-<div class="icon icon-a"></div>
+<div class="icon icon-a" @click="choice(li.id,li,'s')" ></div>
 <p class="item-title">首页</p>
 </li>`;
 
@@ -124,13 +129,45 @@ function t(children) {
             // for (key of item.events) {
             //     console.log(key);
             // }
+            console.log(item.events);
 
+            
+            
             Object.entries(item.events).forEach((key) => {
-                if (key[0] == 'click') {
-                    o.attr['bind:tap'] = key[1].value;
-                } else {
-                    o.attr[`bind:${key[0]}`] = key[1].value;
+                const wxEventName = key[0] == 'click' ? 'bind:tap' : `bind:${key[0]}`;
+
+                // todo: 检测函数名是否存在参数 eg: fn() 或者 fn
+                if (key[1].value.indexOf('(') !== -1) {
+                    // const re = /\((.+)\)/;
+                    // console.log(key, 'true,存在参数');
+                    // console.log(key[1].value.match(re));
+                    // "choice(li.id,'s')"
+                    const ast = recastParse(key[1].value).program.body[0];
+                    const arguments = [];
+                 
+                   const fnName = ast.expression.callee.name ;
+                    ast.expression.arguments.forEach(item=>{
+                        if(item.type === 'MemberExpression'){
+                            arguments.push(`{{${item.object.name}.${item.property.name}}}`)
+                        }
+                        if(item.type === 'Identifier'){
+                            arguments.push(`{{${item.name}}}`)
+                        }
+                        if(item.type === 'Literal'){
+                            console.log({item});
+                            arguments.push(item.raw)
+                        }
+                    })
+
+                    console.log({arguments});
+
+                    o.attr[wxEventName] = fnName ;
+                    o.attr['data-event-params'] = `${arguments}`
+
+                }else{
+                    o.attr[wxEventName] = key[1].value ;
                 }
+               
             });
         }
 

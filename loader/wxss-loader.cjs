@@ -3,6 +3,8 @@ const { URL } = require('url');
 const postcss = require('postcss');
 const postUrl = require('postcss-url');
 const { parse: vueSFCParse, compileScript } = require('@vue/compiler-sfc');
+var Px2rpx = require('px2rpx');
+var px2rpxIns = new Px2rpx({ baseDpr: 1, rpxUnit: 0.5 });
 
 function usePathInfo(src) {
     const dirSrc = path.dirname(src);
@@ -34,5 +36,13 @@ module.exports = function (content) {
     const descriptor = result.descriptor;
     const templateContent = descriptor.template.content;
     const styleContent = result.descriptor.styles[0].content;
+    // try {
+    //     const newCssText = px2rpxIns.generaterpx(styleContent); // generate rpx version stylesheet
+    //     console.log(newCssText);
+    // } catch (error) {
+    //     console.log({ error });
+    // }
+    // var newCssText2 = px2rpxIns.generateThree(originCssText, 2); // generate @1x, @2x and @3x version
     return styleContent;
+    // return newCssText;
 };
