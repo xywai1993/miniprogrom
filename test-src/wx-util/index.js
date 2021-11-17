@@ -1,31 +1,56 @@
-const wxEventName = new Set(...['onLoad', 'onShow', 'onHide']);
+const wxEventName = new Set(['onLoad', 'onShow', 'onHide']);
+console.log({ wxEventName });
 export function CreatePage(params) {
-    const data = Object.assign({}, params, params.data);
+    // const data = Object.assign({}, params);
+
     let uiThis = null;
 
-    const p = new Proxy(data, {
+    const pageData = new Proxy(params.data, {
+        set(target, p, value) {
+            console.log('pageData-set', p);
+            uiThis.setData({ [p]: value });
+            return Reflect.set(target, p, value);
+        },
+        get(target, p) {
+            console.log('pageData-get', p);
+
+            if (target.hasOwnProperty(p)) {
+                return Reflect.get(target, p);
+            } else {
+                return Reflect.get(params, p, pageData);
+            }
+        },
+    });
+
+    const p = new Proxy(params, {
         get: function (obj, prop) {
-            console.log(typeof obj[prop], prop);
+            // console.log(typeof obj[prop], prop);
             if (prop === 'onLoad') {
-                uiThis = this;
+                return function (e) {
+                    uiThis = this;
+                    obj[prop].call(pageData, ...arguments);
+                };
             }
 
-            if (typeof prop === 'function' && !wxEventName.has(prop)) {
+            if (typeof obj[prop] === 'function') {
                 return function (e) {
-                    if (e.currentTarget.dataset.eventParams) {
+                    console.log(e);
+                    if (e.currentTarget && e.currentTarget.dataset && e.currentTarget.dataset.eventParams) {
                         const ps = e.currentTarget.dataset.eventParams.split(',');
-                        obj[prop].call(this, ...ps, e);
+
+                        obj[prop].call(pageData, ...ps, ...arguments);
+                        // obj[prop](...ps, e);
                     } else {
-                        obj[prop].call(this, e);
+                        obj[prop].call(pageData, ...arguments);
                     }
                 };
             }
-            return obj[prop];
+            // return obj[prop];
+            return Reflect.get(obj, prop);
         },
-        set: function (obj, prop, value) {
-            console.log({ obj, prop, value });
-
-            obj[prop] = value;
+        set(target, p, value) {
+            console.log({ p });
+            Reflect.set(target, p, value);
             return true;
         },
     });

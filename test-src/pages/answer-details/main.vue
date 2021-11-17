@@ -127,10 +127,17 @@ const page = {
     },
     choice(id, b) {
         // this.setData({ num: 5 });
-        console.log('choice', this);
+        console.log(this, id, b);
+
+        console.log(this.num);
+        this.setNum();
     },
-    onLoad() {
-        console.log('onload', this);
+    setNum() {
+        const list = [...this.options, { id: 5, content: '22333我教了这么多届学生，你们班是纪律最差的好差超级吵吵架是的🙆🏻‍♀️,老师都气坏了' }];
+        this.options = list;
+    },
+    onLoad(options) {
+        console.log('onload', options);
     },
 };
 CreatePage(page);

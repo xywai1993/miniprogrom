@@ -45,59 +45,30 @@
 <script>
 const app = getApp();
 import { effect, reactive, computed, isProxy } from '@vue/reactivity';
-import { max } from 'underscore';
-import { a } from '../../util/test';
+
 import { GetMaterials } from '../../server/index.js';
+import { CreatePage } from '../../wx-util/index';
 
-console.log(max, a);
-
-console.log('main.vue');
-const data = reactive({
-    list1: [],
-    list2: [],
-    page_size: 1,
-    total_page: 1,
-    list: [],
-    title: '宝妈清单',
-    bgColor: '#00000000',
-});
-
-const d = isProxy(data);
-console.log(d);
-Page({
-    data: data,
+CreatePage({
+    data: {
+        list1: [],
+        list2: [],
+        page_size: 1,
+        total_page: 1,
+        list: [],
+        title: '宝妈清单',
+        bgColor: '#00000000',
+    },
     onLoad() {
-        const that = this;
-
-        // Object.keys(data).forEach((val) => {
-        //     effect(() => {
-        //         console.log('val', val, data[val]);
-        //         that.setData({ [val]: data[val] });
-        //     });
-        // });
-
-        effect(() => {
-            // console.log(1, data);
-            that.setData(data);
-        });
-
         GetMaterials().then((data) => {
             // console.log(11, this.createList(data.list));
 
             this.createGrid(data.list);
-            // this.total_page = Math.ceil(data.total / 20);
-            // this.list = data.list;
+            this.total_page = Math.ceil(data.total / 20);
+            this.list = data.list;
         });
     },
 
-    changeNum() {
-        // data.textNum = data.textNum + 4;
-        data.arr.push(10);
-    },
-    showMe(event) {
-        console.log(2345);
-        data.show = !data.show;
-    },
     goType(type, id) {
         console.log(type);
         let url = '';
@@ -152,21 +123,126 @@ Page({
                 list2.push(item);
             }
         });
-        data.list1 = list1;
-        data.list2 = list2;
+        this.list1 = list1;
+        this.list2 = list2;
     },
     onReachBottom() {
-        if (data.page_size <= data.total_page) {
-            const page = data.page_size + 1;
-            console.log(data.page_size);
+        if (this.page_size <= this.total_page) {
+            const page = this.page_size + 1;
+
             GetMaterials('', '', page).then((d) => {
-                data.page_size = page;
-                data.list = [...data.list, ...d.list];
-                this.createGrid(data.list);
+                this.page_size = page;
+                this.list = [...this.list, ...d.list];
+                this.createGrid(this.list);
             });
         }
     },
 });
+
+// Page({
+//     data: {
+//         list1: [],
+//         list2: [],
+//         page_size: 1,
+//         total_page: 1,
+//         list: [],
+//         title: '宝妈清单',
+//         bgColor: '#00000000',
+//     },
+//     onLoad() {
+//         const that = this;
+
+//         effect(() => {
+//             // console.log(1, data);
+//             that.setData(data);
+//         });
+
+//         GetMaterials().then((data) => {
+//             // console.log(11, this.createList(data.list));
+
+//             this.createGrid(data.list);
+//             // this.total_page = Math.ceil(data.total / 20);
+//             // this.list = data.list;
+//         });
+//     },
+
+//     changeNum() {
+//         // data.textNum = data.textNum + 4;
+//         data.arr.push(10);
+//     },
+//     showMe(event) {
+//         console.log(2345);
+//         data.show = !data.show;
+//     },
+//     goType(type, id) {
+//         console.log(type);
+//         let url = '';
+//         switch (type) {
+//             case 1:
+//                 url = 'pic-details';
+//                 break;
+//             case 2:
+//                 url = 'todo-list';
+//                 break;
+//             case 3:
+//                 url = 'video-list';
+//                 break;
+//             case 4:
+//                 url = 'audio-list';
+//                 break;
+//             case 5:
+//                 url = 'question-list';
+//                 break;
+//             default:
+//                 break;
+//         }
+//         goTo(url, { id });
+//     },
+//     confirm(e) {
+//         console.log(e.target.value);
+//         GetMaterials('', e.target.value).then((da) => {
+//             this.createGrid(da.list);
+//             data.page_size = da.page_size;
+//             data.total_page = da.total_page;
+//         });
+//     },
+//     searchBlur(e) {
+//         console.log(e);
+//         if (!e.target.value) {
+//             GetMaterials().then((data) => {
+//                 console.log(data);
+//                 this.createGrid(data.list);
+//             });
+//         }
+//     },
+//     createGrid(list) {
+//         // const _list = list.reduce((pre, current) => {
+//         //     return pre.concat(current);
+//         // }, []);
+//         const list1 = [];
+//         const list2 = [];
+//         list.forEach((item, index) => {
+//             if (index % 2 === 0) {
+//                 list1.push(item);
+//             } else {
+//                 list2.push(item);
+//             }
+//         });
+//         data.list1 = list1;
+//         data.list2 = list2;
+//     },
+//     onReachBottom() {
+//         if (data.page_size <= data.total_page) {
+//             const page = data.page_size + 1;
+//             console.log(data.page_size);
+//             GetMaterials('', '', page).then((d) => {
+//                 data.page_size = page;
+//                 data.list = [...data.list, ...d.list];
+//                 this.createGrid(data.list);
+//             });
+//         }
+//     },
+// });
 </script>
 
 <style lang="less">

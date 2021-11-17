@@ -24,6 +24,7 @@
 }
 </config>
 <script>
+import { wxPromise } from '../../utils/utils';
 import { goTo } from '../../utils/utils';
 Component({
     properties: {
@@ -44,6 +45,7 @@ Component({
         },
         goTo(url) {
             console.log(url);
+            wx.navigateTo({ url: '/pages/answer-details/main' });
             // goTo('sort');
         },
     },

@@ -33,7 +33,7 @@
         {
           "name": "答题",
           "pathName": "pages/answer-details/main",
-          "query": "",
+          "query": "id=23",
           "scene": null
         }
       ]
