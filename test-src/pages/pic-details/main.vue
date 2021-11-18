@@ -28,7 +28,6 @@
 </config>
 <script>
 import { parseScene, setUrlQuery } from '../../utils/utils';
-
 import { GetMaterialsDetails } from '../../server';
 // import AuthorInfo from '../../page-components/author-info';
 // import CollectBox from '../../page-components/collect-box';
