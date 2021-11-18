@@ -9,14 +9,13 @@
                 </div>
             </div>
             <div class="mt-20">
-                我再说一次，这是一道送分题
-                同学们，这是一道送分题。你要是因为这道题被扣分，你就没救了，今天是1号，1号同学来回答一下问题，大家都知道，我不喜欢拖堂，只讲 2分钟!
+                {{ question }}
             </div>
         </div>
         <ul class="options-box mt-30">
-            <li class="g-flex-start-center options-items" v-for="(li, i) in options" :key="li.id" @click="choice(li.id, 'ss')">
+            <li class="g-flex-start-center options-items" v-for="(li, i) in options" :key="li.id" @click="choice(i)" :class="{ 'js-on': userAnswer[i] }">
                 <h3 class="abc-icon">{{ abc[i] }}</h3>
-                <div class="flex-1">{{ li.content }}</div>
+                <div class="flex-1">{{ li.answer }}</div>
             </li>
         </ul>
         <div class="flex button-submit">
@@ -27,117 +26,44 @@
 </template>
 
 <script>
-// import { parseScene, setUrlQuery } from '../../utils/utils';
-
-// import { GetMaterialsDetails } from '../../server';
-// // import AuthorInfo from '../../page-components/author-info';
-// // import CollectBox from '../../page-components/collect-box';
-// import { previewImage } from '../../utils/utils';
-// import { getImageInfo } from '../../utils/canvas';
-// // import DetailsMixin from '../../mixin/details';
-// // import ColumnBox from '../../page-components/column-box';
-
-// export default {
-//     // components: {
-//     //     'author-info': AuthorInfo,
-//     //     'column-box': ColumnBox,
-//     // },
-//     // mixins: [DetailsMixin],
-//     data() {
-//         return {
-//             pageData: { author: {} },
-//             items: {},
-//             imgList: [],
-//             contentStr: '',
-//             current: 1,
-//             swiperHeight: '400px',
-//         };
-//     },
-//     computed: {
-//         len() {
-//             return this.imgList.length;
-//         },
-//     },
-//     created() {},
-
-//     methods: {
-//         createImgList(list) {
-//             this.imgList = list.reduce((pre, cur) => {
-//                 return pre.concat(cur.items.map((item) => item.cover));
-//             }, []);
-//             console.log(this.imgList);
-//             this.setSwiperHeight(this.imgList[0]);
-//             if (!this.imgList.length) {
-//                 this.imgList = [this.pageData.cover];
-//             }
-//         },
-//         changeCurrent(e) {
-//             this.current = e.target.current + 1;
-//         },
-//         preview(item) {
-//             previewImage(this.imgList, item);
-//         },
-//         setSwiperHeight(img) {
-//             const windowInfo = wx.getWindowInfo();
-//             const query = wx.createSelectorQuery();
-//             query
-//                 .select('#tmp-canvas')
-//                 .fields({ node: true, size: true })
-//                 .exec((res) => {
-//                     const canvas = res[0].node;
-//                     // const ctx = canvas.getContext('2d');
-//                     getImageInfo(img, canvas).then(({ height, width }) => {
-//                         this.swiperHeight = Math.ceil(windowInfo.screenWidth / (width / height)) + 'px';
-//                     });
-//                 });
-//         },
-//     },
-//     onLoad(options) {
-//         console.log({ options });
-//         let id = this.getSceneId(options);
-//         GetMaterialsDetails(id).then((data) => {
-//             this.pageData = data;
-//             this.createImgList(data.items);
-//             this.createCollectData(data);
-//         });
-//     },
-//     onUnload() {
-//         Object.assign(this, this.$options.data());
-//     },
-//     onShareAppMessage() {
-//         return {
-//             title: this.pageData.share_text || this.pageData.title,
-//             imageUrl: this.pageData.share_cover || this.pageData.cover,
-//         };
-//     },
-// };
-import { CreatePage } from '../../wx-util/index.js';
+import { GetItem, GetMaterialsDetails } from '../../server/index.js';
+import { CreatePage } from '../../wx-runtime';
 
 // Page(p);
+
+let question = [];
 const page = {
     data: {
-        options: [
-            { id: 1, content: '我教了这么多届学生，你们班是纪律最差的' },
-            { id: 2, content: '我教了这么多届学生，你们班是纪律最差的233232' },
-            { id: 3, content: '我教了这么多届学生，你们班是纪律最差的好差超级吵吵架是的🙆🏻‍♀️' },
-            { id: 4, content: '我教了这么多届学生，你们班是纪律最差的好差超级吵吵架是的🙆🏻‍♀️,老师都气坏了' },
-        ],
+        question: '',
+        options: [{ id: 1, content: '我教了这么多届学生，你们班是纪律最差的' }],
         abc: ['A', 'B', 'C', 'D', 'E'],
         num: 1,
+        userAnswer: [],
+        questionType: 1, // 1 单选，2 多选
     },
-    choice(id, b) {
+    choice(index) {
         // this.setData({ num: 5 });
-        console.log(this, id, b);
+        this.userAnswer[index] = !this.userAnswer[index];
+        this.userAnswer = this.userAnswer;
+    },
+    setQuestion(index) {
+        const data = question[index];
+        this.num = index + 1;
+        this.options = data.answers;
+        this.userAnswer = data.answers.map((i) => false);
+        this.question = data.question;
+    },
 
-        console.log(this.num);
-        this.setNum();
-    },
-    setNum() {
-        const list = [...this.options, { id: 5, content: '22333我教了这么多届学生，你们班是纪律最差的好差超级吵吵架是的🙆🏻‍♀️,老师都气坏了' }];
-        this.options = list;
-    },
     onLoad(options) {
         console.log('onload', options);
+
+        GetMaterialsDetails(77).then((d) => {
+            console.log(d);
+        });
+        GetItem(760).then((dd) => {
+            question = dd.questions;
+            this.setQuestion(0);
+        });
     },
 };
 CreatePage(page);
@@ -212,5 +138,8 @@ CreatePage(page);
     width: 40px;
     height: 40px;
     background: url('./static/back.png') center/40px 40px no-repeat;
+}
+.js-on {
+    border: 1px solid green;
 }
 </style>

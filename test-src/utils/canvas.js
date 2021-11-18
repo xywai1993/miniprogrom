@@ -143,11 +143,12 @@ const otherObj = {
     height: 667,
     bgColor: '#ffffff',
     canvasId: 'previewCanvas',
+    componentContext: null,
 };
 
-const getCanvas = (id) => {
+const getCanvas = (id, context) => {
     return new Promise((resolve) => {
-        const query = wx.createSelectorQuery();
+        const query = context ? context.createSelectorQuery() : wx.createSelectorQuery();
         query
             .select('#' + id)
             .fields({ node: true, size: true })
@@ -170,7 +171,7 @@ const drawImage = async (data, otherData) => {
     const other = Object.assign(otherObj, otherData);
 
     // const ctx = wx.createCanvasContext(other.canvasId);
-    const canvas = await getCanvas(other.canvasId, other.width, other.height);
+    const canvas = await getCanvas(other.canvasId, other.componentContext);
     const ctx = canvas.getContext('2d');
     const dpr = wx.getSystemInfoSync().pixelRatio;
     canvas.width = other.width * dpr;

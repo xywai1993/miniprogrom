@@ -11,7 +11,7 @@
             <div class="flex-1 item-author">{{ tagData.author.nickname }}</div>
             <div class="item-collect">{{ tagData.like_count }}</div>
         </div>
-        <!-- <div class="tag" :class="tag"></div> -->
+        <div class="tag {{tag}}"></div>
     </div>
 </template>
 <config lang="json">
@@ -20,6 +20,7 @@
 }
 </config>
 <script>
+const tagClassName = ['tuwen', 'tiaomu', 'shiping', 'yinping'];
 Component({
     options: {
         addGlobalClass: true,
@@ -38,13 +39,16 @@ Component({
                 author: { nickname: '11', avatar: '22' },
             },
             observer: function (newVal, oldVal) {
+                // this.tag = tagClassName[newVal.type - 1];
                 // 属性值变化时执行
+                this.setData({ tag: tagClassName[newVal.type - 1] });
             },
         },
     },
     data: {
         // 这里是一些组件内部数据
         someData: {},
+        tag: 'tuwen',
     },
     methods: {
         // 这里是一个自定义方法

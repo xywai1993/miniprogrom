@@ -35,7 +35,7 @@
         "watch": "cross-env NODE_ENV=development node --loader ts-node/esm src/watch.ts",
         "tsc": "tsc",
         "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest",
-        "webpack": "webpack -w",
+        "webpack:dev": "webpack -w",
         "http-server": "http-server -p 3333 -d dist",
         "webpack:build": "webpack --mode production",
         "test-vue": "node ./loader/vue.cjs"

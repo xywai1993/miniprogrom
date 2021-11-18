@@ -1,7 +1,7 @@
 <template>
     <div class="body">
         <mp-navigation-bar :ext-class="'nav-bar'" :background="bgColor" :title="title" :back="false" color="#FFF">
-            <view slot="left" v-show="!title">
+            <view slot="left" v-if="!title">
                 <input type="text" class="top-search" placeholder="2021年待产包清单" @confirm="confirm" @blur="searchBlur" />
             </view>
         </mp-navigation-bar>
@@ -12,16 +12,16 @@
         <div class="grid">
             <view>
                 <ul class="list-wrap">
-                    <li wx:for="{{list1}}" wx:key="material_id" class="item">
-                        <list-tag tagData="{{item}}"></list-tag>
+                    <li v-for="li in list1" :key="li.material_id" class="item" @click="goType(li.type, li.material_id)">
+                        <list-tag :tagData="li"></list-tag>
                     </li>
                 </ul>
             </view>
 
             <view>
                 <ul class="list-wrap">
-                    <li wx:for="{{list2}}" wx:key="material_id" class="item">
-                        <list-tag tagData="{{item}}"></list-tag>
+                    <li v-for="li in list2" :key="li.material_id" class="item">
+                        <list-tag :tagData="li"></list-tag>
                     </li>
                 </ul>
             </view>
@@ -37,7 +37,8 @@
     "usingComponents": {
         "demo-tag": "/components/demo/main",
         "nav-nav": "/components/nav/main",
-        "list-tag": "/components/list-tag/main"
+        "list-tag": "/components/list-tag/main",
+        "mp-navigation-bar": "weui-miniprogram/navigation-bar/navigation-bar"
     },
     "navigationStyle": "custom"
 }
@@ -47,7 +48,8 @@ const app = getApp();
 import { effect, reactive, computed, isProxy } from '@vue/reactivity';
 
 import { GetMaterials } from '../../server/index.js';
-import { CreatePage } from '../../wx-util/index';
+import { CreatePage } from '../../wx-runtime';
+import { goTo } from '../../utils/utils';
 
 CreatePage({
     data: {
@@ -70,9 +72,9 @@ CreatePage({
     },
 
     goType(type, id) {
-        console.log(type);
+        console.log({ type });
         let url = '';
-        switch (type) {
+        switch (Number(type)) {
             case 1:
                 url = 'pic-details';
                 break;
@@ -135,6 +137,15 @@ CreatePage({
                 this.list = [...this.list, ...d.list];
                 this.createGrid(this.list);
             });
+        }
+    },
+    onPageScroll(e) {
+        if (e.scrollTop > 50) {
+            this.bgColor = '#fff';
+            this.title = '';
+        } else {
+            this.bgColor = '#00000000';
+            this.title = '宝妈清单';
         }
     },
 });

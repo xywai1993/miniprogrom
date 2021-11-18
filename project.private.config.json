@@ -35,6 +35,18 @@
           "pathName": "pages/answer-details/main",
           "query": "id=23",
           "scene": null
+        },
+        {
+          "name": "pages/pic-details/main",
+          "pathName": "pages/pic-details/main",
+          "query": "",
+          "scene": null
+        },
+        {
+          "name": "商品清单",
+          "pathName": "pages/product-details/main",
+          "query": "",
+          "scene": null
         }
       ]
     }

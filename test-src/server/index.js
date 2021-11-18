@@ -58,3 +58,11 @@ export function ChangeComplete(item_id) {
 export function GetBanner(type = 'banner') {
     return d.get('/api/ads', { type });
 }
+
+export function GetItem(item_id) {
+    return d.get('/api/list_items/show', { item_id });
+}
+
+export function GetPosterData(material_id, page, scene) {
+    return d.get('/api/lists/poster', { material_id, page, scene });
+}

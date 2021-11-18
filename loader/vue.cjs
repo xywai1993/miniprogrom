@@ -6,6 +6,7 @@ const { visit, parse: recastParse, print, types } = require('recast');
 // const jsdom = require('jsdom');
 // const { JSDOM } = jsdom;
 
+
 /**
  *{
   node: 'root',
@@ -55,6 +56,9 @@ function changeElementName(tagName) {
     if (inlineList.indexOf(tagName) !== -1) {
         return 'text';
     }
+    if(tagName === 'img'){
+        return 'image'
+    }
     return tagName;
 }
 
@@ -62,10 +66,7 @@ function removeQuote(str, single = false) {
     return single ? str.replace(/\'/g, '') : str.replace(/\"/g, '');
 }
 
-const template = ` <li class="item " :class="{ on: isActive == 'a' }" v-on:click="goTo">
-<div class="icon icon-a" @click="choice(li.id,li,'s')" ></div>
-<p class="item-title">首页</p>
-</li>`;
+
 
 function t(children) {
     return children.map((item) => {
@@ -111,9 +112,18 @@ function t(children) {
         }
 
         if (item.attrs) {
-            item.attrs.forEach((attr) => {
+            item.attrs.forEach((attr,i) => {
                 // todo: 这里将来可能会有bug 强制去掉了双引号
-                o.attr[attr.name] = attr.value.replace(/\"/g, '');
+              
+                const name = item.attrs[i].name ;
+                if(attr.dynamic === false){
+                    // o.attr[name] = attr.value.replace(/\"/g, '');
+                    o.attr[name] = `{{${attr.value}}}`
+                }else{
+                    // o.attr[name] = `${attr.value}`
+                    o.attr[name] = attr.value.replace(/\"/g, '');
+                }
+                // o.attr[attr.name] = attr.value.replace(/\"/g, '');
             });
         }
 
@@ -126,13 +136,8 @@ function t(children) {
         }
 
         if (item.events) {
-            // for (key of item.events) {
-            //     console.log(key);
-            // }
-            console.log(item.events);
-
-            
-            
+          
+        
             Object.entries(item.events).forEach((key) => {
                 const wxEventName = key[0] == 'click' ? 'bind:tap' : `bind:${key[0]}`;
 
@@ -180,6 +185,7 @@ function t(children) {
         }
 
         if (item.classBinding) {
+          
             // '{a:some}' 转换为 [a:some]
             const classArr = item.classBinding.replace(/{|}/g, '').split(',');
             classArr.forEach((str) => {
@@ -195,6 +201,34 @@ function t(children) {
             });
         }
 
+        if (item.styleBinding) {
+          
+        
+            const ast = recastParse(item.styleBinding).program.body[0];          
+            let styleStr = '';
+            if(ast.type === 'BlockStatement'){
+                const body = ast.body[0];
+
+                ast.body.forEach(style=>{
+                    // todo: expression 有多种可能
+                    // {height: someVar}  type = 'Identifier'
+                    // {height: someVar+'px'}  type = 'BinaryExpression'
+                    if(style.body.expression.type='Identifier'){
+                        styleStr += `;${style.label.name}:{{${style.body.expression.name}}}`
+                    }
+                   
+                })
+
+                if (o.attr.style) {
+                        o.attr.class.style += styleStr;
+                } else {
+                    o.attr['style'] = styleStr;
+                }
+            }
+
+
+        }
+
         if (item.children) {
             o.child = t(item.children);
         }
@@ -203,7 +237,10 @@ function t(children) {
 }
 
 // console.log(html2json(template));
-
+console.log(html2json(`<div style="height:30px;"></div>`).child);
+const template = `
+<img src="https://baidu.com" />
+`;
 const r = template2WxTemplate(template);
 console.log(r);
 function template2WxTemplate(template) {

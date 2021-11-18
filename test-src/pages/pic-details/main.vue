@@ -2,11 +2,11 @@
     <div class="body">
         <swiper class="header" :style="{ height: swiperHeight }" @change="changeCurrent">
             <swiper-item v-for="(item, index) in imgList" :key="index" @click="preview(item)">
-                <img :src="item" mode="widthFix" class="g-img" />
+                <image :src="item" mode="widthFix" class="g-img"></image>
             </swiper-item>
         </swiper>
         <div class="nums">{{ current }}/{{ len }}</div>
-        <!-- <column-box :title="pageData.title" :tag="pageData.tags"></column-box> -->
+        <column-box :title="pageData.title" :tag="pageData.tags"></column-box>
         <div class="content">
             <div class="mt-10">
                 <mp-html :content="pageData.content"></mp-html>
@@ -14,10 +14,18 @@
             </div>
         </div>
         <canvas id="tmp-canvas" type="2d" class="tmp-canvas"></canvas>
-        <!-- <author-info :avatar="pageData.author.avatar" :nickname="pageData.author.nickname" :collect-data="collectData"></author-info> -->
+        <author-info :avatar="pageData.author.avatar" :nickname="pageData.author.nickname" :collect-data="collectData"></author-info>
     </div>
 </template>
-
+<config lang="json">
+{
+    "usingComponents": {
+        "mp-html": "/static/mp-weixin/index",
+        "author-info": "/components/author-info/main",
+        "column-box": "/components/column-box/main"
+    }
+}
+</config>
 <script>
 import { parseScene, setUrlQuery } from '../../utils/utils';
 
@@ -26,71 +34,57 @@ import { GetMaterialsDetails } from '../../server';
 // import CollectBox from '../../page-components/collect-box';
 import { previewImage } from '../../utils/utils';
 import { getImageInfo } from '../../utils/canvas';
-// import DetailsMixin from '../../mixin/details';
-// import ColumnBox from '../../page-components/column-box';
+import { CreatePage } from '../../wx-runtime';
 
-export default {
-    // components: {
-    //     'author-info': AuthorInfo,
-    //     'column-box': ColumnBox,
-    // },
-    // mixins: [DetailsMixin],
-    data() {
-        return {
-            pageData: { author: {} },
-            items: {},
-            imgList: [],
-            contentStr: '',
-            current: 1,
-            swiperHeight: '400px',
-        };
+CreatePage({
+    data: {
+        pageData: { author: {} },
+        items: {},
+        imgList: [],
+        contentStr: '',
+        current: 1,
+        swiperHeight: '400px',
+        len: 1,
     },
-    computed: {
-        len() {
-            return this.imgList.length;
-        },
+    createImgList(list) {
+        this.imgList = list.reduce((pre, cur) => {
+            return pre.concat(cur.items.map((item) => item.cover));
+        }, []);
+        console.log(this.imgList);
+        this.setSwiperHeight(this.imgList[0]);
+        this.len = this.imgList.length;
+        if (!this.imgList.length) {
+            this.imgList = [this.pageData.cover];
+        }
     },
-    created() {},
-
-    methods: {
-        createImgList(list) {
-            this.imgList = list.reduce((pre, cur) => {
-                return pre.concat(cur.items.map((item) => item.cover));
-            }, []);
-            console.log(this.imgList);
-            this.setSwiperHeight(this.imgList[0]);
-            if (!this.imgList.length) {
-                this.imgList = [this.pageData.cover];
-            }
-        },
-        changeCurrent(e) {
-            this.current = e.target.current + 1;
-        },
-        preview(item) {
-            previewImage(this.imgList, item);
-        },
-        setSwiperHeight(img) {
-            const windowInfo = wx.getWindowInfo();
-            const query = wx.createSelectorQuery();
-            query
-                .select('#tmp-canvas')
-                .fields({ node: true, size: true })
-                .exec((res) => {
-                    const canvas = res[0].node;
-                    // const ctx = canvas.getContext('2d');
-                    getImageInfo(img, canvas).then(({ height, width }) => {
-                        this.swiperHeight = Math.ceil(windowInfo.screenWidth / (width / height)) + 'px';
-                    });
+    changeCurrent(e) {
+        console.log('changeCurrent', e);
+        this.current = e.detail.current + 1;
+    },
+    preview(item) {
+        previewImage(this.imgList, item);
+    },
+    setSwiperHeight(img) {
+        const windowInfo = wx.getWindowInfo();
+        const query = wx.createSelectorQuery();
+        query
+            .select('#tmp-canvas')
+            .fields({ node: true, size: true })
+            .exec((res) => {
+                const canvas = res[0].node;
+                // const ctx = canvas.getContext('2d');
+                getImageInfo(img, canvas).then(({ height, width }) => {
+                    this.swiperHeight = Math.ceil(windowInfo.screenWidth / (width / height)) + 'px';
                 });
-        },
+            });
     },
     onLoad(options) {
         console.log({ options });
-        let id = this.getSceneId(options);
-        GetMaterialsDetails(id).then((data) => {
+        // let id = this.getSceneId(options);
+        GetMaterialsDetails(70).then((data) => {
             this.pageData = data;
             this.createImgList(data.items);
-            this.createCollectData(data);
+            // this.createCollectData(data);
         });
     },
     onUnload() {
@@ -102,7 +96,7 @@ export default {
             imageUrl: this.pageData.share_cover || this.pageData.cover,
         };
     },
-};
+});
 </script>
 
 <style lang="less" scoped>
