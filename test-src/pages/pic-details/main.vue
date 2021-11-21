@@ -1,6 +1,6 @@
 <template>
     <div class="body">
-        <swiper class="header" :style="{ height: swiperHeight }" @change="changeCurrent">
+        <swiper class="header" style="background-color: #fff" :style="{ height: swiperHeight }" @change="changeCurrent">
             <swiper-item v-for="(item, index) in imgList" :key="index" @click="preview(item)">
                 <image :src="item" mode="widthFix" class="g-img"></image>
             </swiper-item>

@@ -56,10 +56,49 @@ function changeElementName(tagName) {
     if (inlineList.indexOf(tagName) !== -1) {
         return 'text';
     }
-    if(tagName === 'img'){
+    if (tagName === 'img') {
         return 'image'
     }
     return tagName;
+}
+
+/**
+ * 
+ * @param bindStyle {string}  类似这样的 "{'width':some+'px',height:some2}"
+ * @returns {string}
+ */
+function changeBindStyle(bindStyle){
+    const ast = recastParse(`const test = ${bindStyle}`).program.body[0].declarations[0].init.properties;
+    let styleStr = '';
+
+    ast.forEach(style => {
+        const value = style.value;
+        const key = style.key.type === 'Identifier'? style.key.name :'style.key.value';
+        if (value.type == 'BinaryExpression') {
+            let left = '';
+            let right = ''
+            if (value.left.type === 'Identifier') {
+                left = value.left.name
+            }
+            if (value.left.type === 'Literal') {
+                left = value.left.raw;
+            }
+
+            if (value.right.type === 'Identifier') {
+                right = value.right.name
+            }
+            if (value.right.type === 'Literal') {
+                right = value.right.raw;
+            }
+            styleStr += `;${key}:{{${left}${value.operator}${right}}}`
+        }
+
+        if (value.type == 'Identifier') {
+            styleStr += `;${key}:{{${value.name}}}`
+        }
+    })
+
+    return styleStr;
 }
 
 function removeQuote(str, single = false) {
@@ -112,14 +151,14 @@ function t(children) {
         }
 
         if (item.attrs) {
-            item.attrs.forEach((attr,i) => {
+            item.attrs.forEach((attr, i) => {
                 // todo: 这里将来可能会有bug 强制去掉了双引号
-              
-                const name = item.attrs[i].name ;
-                if(attr.dynamic === false){
+
+                const name = item.attrs[i].name;
+                if (attr.dynamic === false) {
                     // o.attr[name] = attr.value.replace(/\"/g, '');
                     o.attr[name] = `{{${attr.value}}}`
-                }else{
+                } else {
                     // o.attr[name] = `${attr.value}`
                     o.attr[name] = attr.value.replace(/\"/g, '');
                 }
@@ -136,43 +175,40 @@ function t(children) {
         }
 
         if (item.events) {
-          
-        
+
+
             Object.entries(item.events).forEach((key) => {
                 const wxEventName = key[0] == 'click' ? 'bind:tap' : `bind:${key[0]}`;
 
                 // todo: 检测函数名是否存在参数 eg: fn() 或者 fn
                 if (key[1].value.indexOf('(') !== -1) {
-                    // const re = /\((.+)\)/;
-                    // console.log(key, 'true,存在参数');
-                    // console.log(key[1].value.match(re));
-                    // "choice(li.id,'s')"
+
                     const ast = recastParse(key[1].value).program.body[0];
                     const arguments = [];
-                 
-                   const fnName = ast.expression.callee.name ;
-                    ast.expression.arguments.forEach(item=>{
-                        if(item.type === 'MemberExpression'){
+
+                    const fnName = ast.expression.callee.name;
+                    ast.expression.arguments.forEach(item => {
+                        if (item.type === 'MemberExpression') {
                             arguments.push(`{{${item.object.name}.${item.property.name}}}`)
                         }
-                        if(item.type === 'Identifier'){
+                        if (item.type === 'Identifier') {
                             arguments.push(`{{${item.name}}}`)
                         }
-                        if(item.type === 'Literal'){
-                            console.log({item});
+                        if (item.type === 'Literal') {
+                           
                             arguments.push(item.raw)
                         }
                     })
 
-                    console.log({arguments});
+                  
 
-                    o.attr[wxEventName] = fnName ;
+                    o.attr[wxEventName] = fnName;
                     o.attr['data-event-params'] = `${arguments}`
 
-                }else{
-                    o.attr[wxEventName] = key[1].value ;
+                } else {
+                    o.attr[wxEventName] = key[1].value;
                 }
-               
+
             });
         }
 
@@ -185,7 +221,7 @@ function t(children) {
         }
 
         if (item.classBinding) {
-          
+
             // '{a:some}' 转换为 [a:some]
             const classArr = item.classBinding.replace(/{|}/g, '').split(',');
             classArr.forEach((str) => {
@@ -201,30 +237,33 @@ function t(children) {
             });
         }
 
-        if (item.styleBinding) {
-          
-        
-            const ast = recastParse(item.styleBinding).program.body[0];          
-            let styleStr = '';
-            if(ast.type === 'BlockStatement'){
-                const body = ast.body[0];
+        if (item.staticStyle) {
+            // const ast = recastParse(removeQuote(item.staticStyle)).program.body[0];
+            let styleStr = item.attrsMap.style;
 
-                ast.body.forEach(style=>{
-                    // todo: expression 有多种可能
-                    // {height: someVar}  type = 'Identifier'
-                    // {height: someVar+'px'}  type = 'BinaryExpression'
-                    if(style.body.expression.type='Identifier'){
-                        styleStr += `;${style.label.name}:{{${style.body.expression.name}}}`
-                    }
-                   
-                })
-
-                if (o.attr.style) {
-                        o.attr.class.style += styleStr;
-                } else {
-                    o.attr['style'] = styleStr;
-                }
+            if (o.attr.style) {
+                o.attr.style += styleStr;
+            } else {
+                o.attr['style'] = styleStr;
             }
+
+           
+        }
+
+        if (item.styleBinding) {
+
+            
+            const styleStr = changeBindStyle(item.styleBinding);
+
+            if (o.attr.style) {
+                o.attr.style += styleStr;
+            } else {
+                o.attr['style'] = styleStr;
+            }
+
+            
+
+            console.log(o.attr['style']);
 
 
         }
@@ -237,9 +276,9 @@ function t(children) {
 }
 
 // console.log(html2json(template));
-console.log(html2json(`<div style="height:30px;"></div>`).child);
+console.log(html2json(`<img style="color:red;"  src="https://baidu.com" />`).child);
 const template = `
-<img src="https://baidu.com" />
+<img style="color:red;" :style="{width:some+'px',height:some2}"  src="https://baidu.com" />
 `;
 const r = template2WxTemplate(template);
 console.log(r);

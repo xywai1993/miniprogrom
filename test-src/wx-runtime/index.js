@@ -1,5 +1,5 @@
 const wxEventName = new Set(['onLoad', 'onShow', 'onHide']);
-console.log({ wxEventName });
+
 export function CreatePage(params) {
     // const data = Object.assign({}, params);
 
