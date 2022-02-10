@@ -3,6 +3,7 @@
     "version": "0.1.6",
     "main": "build/watch.js",
     "author": "yiper.fan",
+    "packageManager": "pnpm",
     "dependencies": {
         "@babel/core": "^7.15.5",
         "@babel/plugin-transform-modules-commonjs": "^7.15.4",
@@ -11,6 +12,8 @@
         "@vue/compiler-sfc": "^3.2.11",
         "@vue/reactivity": "^3.2.11",
         "@yiper.fan/taskbuild": "^0.0.19",
+        "@yiper.fan/wx-mini-loader": "^0.0.3",
+        "@yiper.fan/wx-mini-runtime": "^0.0.4",
         "css-loader": "^6.5.0",
         "glob": "^7.2.0",
         "html2json": "^1.0.2",

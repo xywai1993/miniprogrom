@@ -1,4 +1,10 @@
+import { effect, isProxy, isRef, toRaw, unref } from '@vue/reactivity';
+
 const wxEventName = new Set(['onLoad', 'onShow', 'onHide']);
+
+const isNullUndefined = (val) => {
+    return val ?? true;
+};
 
 export function CreatePage(params) {
     // const data = Object.assign({}, params);
@@ -37,10 +43,13 @@ export function CreatePage(params) {
             if (typeof obj[prop] === 'function') {
                 return function (e) {
                     // console.log('proxy', prop, ...arguments);
-                    if (e.currentTarget && e.currentTarget.dataset && e.currentTarget.dataset.eventParams && String(e.currentTarget.dataset.eventParams)) {
-                        const ps = String(e.currentTarget.dataset.eventParams).split(',');
-                        console.log('执行这个？？？？');
-                        obj[prop].call(pageData, ...ps, ...arguments);
+
+                    if (e.currentTarget && e.currentTarget.dataset) {
+                        if (e.currentTarget.dataset.hasOwnProperty('eventParams')) {
+                            const ps = String(e.currentTarget.dataset.eventParams).split(',');
+                            obj[prop].call(pageData, ...ps, ...arguments);
+                        }
+
                         // obj[prop](...ps, e);
                     } else {
                         console.log('执行这个');
@@ -88,7 +97,7 @@ export function CreateComponent(params) {
             return Reflect.set(target, p, value);
         },
         get(target, p) {
-            console.log('ComponentData-get', p);
+            // console.log('ComponentData-get', p);
 
             // 系统方法原样返回 详细方法见文档 https://developers.weixin.qq.com/miniprogram/dev/reference/api/Component.html
             if (wxComponentFuncName.indexOf(p) !== -1) {
@@ -117,14 +126,14 @@ export function CreateComponent(params) {
 
     const comMethod = new Proxy(params.methods, {
         get(target, p) {
-            console.log('ComponentMethods-get', p);
+            // console.log('ComponentMethods-get', p);
 
             if (p === 'hasOwnProperty') {
                 return Reflect.get(target, p);
             }
 
             return function (e) {
-                if (e.currentTarget && e.currentTarget.dataset && e.currentTarget.dataset.eventParams && String(e.currentTarget.dataset.eventParams)) {
+                if (e.currentTarget && e.currentTarget.dataset && e.currentTarget.dataset.hasOwnProperty('eventParams')) {
                     const ps = String(e.currentTarget.dataset.eventParams).split(',');
                     target[p].call(comData, ...ps, ...arguments);
                 } else {
@@ -137,7 +146,7 @@ export function CreateComponent(params) {
 
     const p = new Proxy(params, {
         get: function (obj, prop) {
-            console.log('Components', typeof obj[prop], prop);
+            // console.log('Components', typeof obj[prop], prop);
             if (prop === 'ready') {
                 return function (e) {
                     uiThis = this;
@@ -152,3 +161,55 @@ export function CreateComponent(params) {
     p.data = comData;
     return Component(p);
 }
+
+export const setup = (callback) => {
+    let uiThis = null;
+
+    const data = callback();
+
+    const page = {
+        data: {},
+    };
+
+    Object.entries(data).forEach((item) => {
+        const key = item[0];
+        const value = item[1];
+
+        if (typeof value !== 'function') {
+            console.log(value, isRef(value));
+
+            if (isRef(value)) {
+                console.log(key, value);
+                effect(() => {
+                    console.log(123, value.value);
+                    if (uiThis) {
+                        console.log(8790);
+                        uiThis.setData({ [key]: value.value });
+                    }
+                });
+                page.data[key] = unref(value);
+            } else {
+                page.data[key] = value;
+            }
+        } else {
+            page[key] = value;
+        }
+    });
+
+    const p = new Proxy(page, {
+        get: function (obj, prop) {
+            if (prop === 'onLoad') {
+                console.log('???', obj);
+                return function (e) {
+                    uiThis = this;
+                    obj[prop].call(this, e);
+                };
+            }
+
+            return Reflect.get(obj, prop);
+        },
+    });
+
+    // return CreatePage(page);
+    return Page(p);
+};

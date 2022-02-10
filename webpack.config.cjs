@@ -1,6 +1,5 @@
 const path = require('path');
 const qs = require('querystring');
-const { VueLoaderPlugin } = require('vue-loader');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const glob = require('glob');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -47,9 +46,9 @@ module.exports = {
     },
     resolveLoader: {
         alias: {
-            'demo-loader': path.resolve(__dirname, './loader/demo-loader.cjs'),
-            'wxss-loader': path.resolve(__dirname, './loader/wxss-loader.cjs'),
-            'wxml-loader': path.resolve(__dirname, './loader/wxml-loader.cjs'),
+            'demo-loader': '@yiper.fan/wx-mini-loader/demo-loader.cjs',
+            'wxss-loader': '@yiper.fan/wx-mini-loader/wxss-loader.cjs',
+            'wxml-loader': '@yiper.fan/wx-mini-loader/wxml-loader.cjs',
         },
     },
     module: {
@@ -74,19 +73,9 @@ module.exports = {
             {
                 test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
                 type: 'asset/resource',
-                // type: 'asset',
-                // options: {
-                //     limit: 6,
-                //     name: utils.assetsPath('img/[name].[hash:5].[ext]'),
-                // },
                 generator: {
                     filename: 'img/[name].[hash:5][ext]',
                 },
-                // parser: {
-                //     dataUrlCondition: {
-                //         maxSize: 4 * 1024, // 4kb
-                //     },
-                // },
             },
 
             {
@@ -105,18 +94,30 @@ module.exports = {
                                 },
                             },
                             'less-loader',
-                            'wxss-loader',
+                            {
+                                loader: 'wxss-loader',
+                                options: {
+                                    root: 'test-src',
+                                },
+                            },
                         ],
                     },
                     {
                         resourceQuery: /template/, // foo.css?external
-                        use: ['wxml-loader'],
+                        use: [
+                            {
+                                loader: 'wxml-loader',
+                                options: {
+                                    root: 'test-src',
+                                },
+                            },
+                        ],
                     },
                 ],
                 // use: ['demo-loader'],
                 use: [
                     {
-                        loader: path.resolve(__dirname, './loader/demo-loader.cjs'),
+                        loader: 'demo-loader',
                         options: {
                             root: 'test-src',
                         },
